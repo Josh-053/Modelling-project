@@ -1,0 +1,114 @@
+---
+title: "Untitled"
+author: "Joshua Ijidakinro, Ali Kazim"
+format: pdf
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+```
+
+```{r}
+data <- read.table("dataset.txt", 
+                  sep = " ",        # space-separated
+                  na.strings = ".", # treat "." as NA
+                  header = TRUE)
+
+data <- data %>%
+  mutate(DOSE = as.numeric(DOSE),
+         EVID = case_when(
+           is.na(CONC) & DOSE!=0 ~ 1,
+           CONC>=0 ~ 0,
+           is.na(CONC) & is.na(DOSE) ~ 2))
+         
+data <- data %>% group_by(ID) %>%  
+  fill(c(BW),.direction = "downup") %>% 
+  ungroup()
+
+data$AMT = data$DOSE * data$BW
+
+write.table(data, file = "dataset_clean.txt", quote = FALSE, sep = " ", na = ".")
+write.csv(data, file = "dataset_clean.csv", quote = FALSE, na = ".", row.names = FALSE)
+```
+
+
+```{fortran}
+;; 1. Based on: run01
+;; 2. Description: PMX001 Base Model Development
+;; x1. Joshua Ijidakinro and Ali Kazim
+;; 2025-11-12
+
+$PROBLEM PMX001 Base Model Development
+
+$INPUT DUMMY=DROP ID TIME WEEK DOSE RATE CONC=DV ADA BW ALB SEX AGE CREAT COL EVID AMT
+
+$DATA
+dataset_clean.txt
+IGNORE=@
+
+$SUBROUTINES
+ADVAN3; 2-compartmental model
+TRANS3; CL, V, VSS, Q
+
+$PK
+ TVCL = THETA(1)
+   CL = TVCL  * EXP(ETA(1))
+  TVV = THETA(2)
+    V = TVV   * EXP(ETA(2))
+TVVSS = THETA(3)
+  VSS = TVVSS * EXP(ETA(3))
+  TVQ = THETA(4)
+    Q = TVQ   * EXP(ETA(4))
+   S2 = V/1                ; scale prediction based on DOSE (mg) and DV (mg/L)
+
+$ERROR
+Y = F + EPS(1); additive
+LLOQ = 1.0; LLOQ from ELISA
+
+
+$THETA; explore dataset & literature, SAME order as PK
+(0, 0.012, 0.024); L/h, CL value from adalimumab (1)
+(0, 4.45, 10); L, V value for adalimumab biosimilar (2,3)
+(0, 6, 12); L, VSS value for adalimumab (1)
+1
+
+$OMEGA; variance covariance matrix for interindividual variability
+0.1
+0.1
+0.1
+0.1
+
+$SIGMA; variance covariance matrix for residual error
+0.1
+
+$EST; estimation step
+METHOD=1
+INTERACTION
+MAXEVALS=10000
+
+$COV
+
+$TABLE; output table
+FILE=run01
+
+;; REFERENCES
+;; 1) https://www.ncbi.nlm.nih.gov/books/NBK557889/
+;; 2) https://pmc.ncbi.nlm.nih.gov/articles/PMC8301575/
+;; 3) https://ascpt.onlinelibrary.wiley.com/doi/abs/10.1016/j.clpt.2004.12.212
+```
+
+You can add options to executable code like this 
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
