@@ -1,5 +1,5 @@
 ;; 1. Based on: run01
-;; 2. Description: PMX001 Two Compartment
+;; 2. Description: PMX001 2CMT LINEAR
 ;; x1. Joshua I., Ali K.
 ;; 2025-12-09
 
@@ -83,3 +83,4 @@ ID BW ALB AGE CREAT NOPRINT NOAPPEND ONEHEADER FILE=run02_cotab
 ;; 1) https://www.ncbi.nlm.nih.gov/books/NBK557889/
 ;; 2) https://pmc.ncbi.nlm.nih.gov/articles/PMC8301575/
 ;; 3) https://ascpt.onlinelibrary.wiley.com/doi/abs/10.1016/j.clpt.2004.12.212
+
