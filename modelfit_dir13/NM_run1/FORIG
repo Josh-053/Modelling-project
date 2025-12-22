@@ -1,5 +1,0 @@
-$PK 
-TVVMAX = THETA(1) 
-  VMAX = TVVMAX * EXP(ETA(1)) 
-  TVKM = THETA(2) 
-    KM = TVCL * EXP(ETA(2)) 
