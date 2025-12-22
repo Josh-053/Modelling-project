@@ -1,0 +1,4 @@
+$DES DADT(1) = -K10*A(1)  ; ODE for central compartment 
+$ERROR 
+LLOQ = 1
+PROP = IPRED*THETA(3)

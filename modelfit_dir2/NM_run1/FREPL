@@ -1,0 +1,7 @@
+$DES DADT(1) = -K10*A(1)  ; ODE for central compartment 
+$ERROR 
+IPRED = F
+LLOQ = 1
+PROP = IPRED*THETA(3)
+ADD = THETA(4)
+IF (BLQ.EQ.1) ADD = ADD + LLOQ

@@ -1,11 +1,11 @@
 ;; 1. Based on: run01
-;; 2. Description: PMX001 One Compartment
+;; 2. Description: PMX001 1CMT LINEAR M7+
 ;; x1. Joshua I., Ali K.
 ;; 2025-12-09
 
 $PROBLEM PMX001 One Compartment
 
-$INPUT DUMMY=DROP ID TIME WEEK DOSE=DROP RATE CONC=DV ADA BW ALB SEX AGE CREAT COL EVID AMT
+$INPUT DUMMY=DROP ID TIME WEEK DOSE=DROP RATE CONC=DV ADA BW ALB SEX AGE CREAT COL EVID BLQ AMT
 
 $DATA
 dataset_clean.csv
@@ -28,25 +28,38 @@ TVCL = THETA(1)
  K10 = CL/V
   S1 = V ; scale prediction based on DOSE (mmol) and DV (mmol/L)
 
+$DES DADT(1) = -K10*A(1)  ; ODE for central compartment
+
+$ERROR
+IPRED = F
+LLOQ = 1
+
+PROP = IPRED*THETA(3)
+ADD = THETA(4)
+IF (BLQ.EQ.1) ADD = ADD + LLOQ
+
+W = SQRT(ADD**2+PROP**2)
+
+IF (W.LE.0.000001) W=0.000001 ; Protective code
+
+IRES=CONC-IPRED
+IWRES=IRES/W
+
+Y = IPRED + W*ERR(1)
+
 $THETA
-(0, 0.012); CL [1]
-(0, 4.45) ; V [2,3]
+(0, 0.012)    ; CL [1]
+(0, 4.45)     ; V [2,3]
+(0, 0.2, 0.5) ; PROP error ()
+(0, 0.2, 10)  ; ADD (mg/L)
+
 
 $OMEGA
 0.05 ; IIV/BSV CL, fix to 0 to exclude
 0.05 ; IIV/BSV V
 
 $SIGMA ; residual variability
-0.1    ; proportional error
-
-$DES DADT(1) = -K10*A(1)  ; ODE for central compartment
-
-$ERROR
-IPRED = F
-Y = IPRED + IPRED*ERR(1)
-W = SQRT(IPRED**2*SIGMA(1,1)) ; new
-IRES  = CONC - IPRED
-IWRES = IRES / W
+1 FIX ; errors already adjusted under $ERROR as THETAs
 
 $EST
 METHOD=1 INTERACTION; FOCE-I
@@ -72,3 +85,4 @@ ID BW ALB AGE CREAT NOPRINT NOAPPEND ONEHEADER FILE=run01_cotab
 ;; 1] https://www.ncbi.nlm.nih.gov/books/NBK557889/
 ;; 2] https://pmc.ncbi.nlm.nih.gov/articles/PMC8301575/
 ;; 3] https://ascpt.onlinelibrary.wiley.com/doi/abs/10.1016/j.clpt.2004.12.212
+

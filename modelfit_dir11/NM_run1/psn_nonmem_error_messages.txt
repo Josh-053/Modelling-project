@@ -1,0 +1,11 @@
+
+NMtran failed. There is no output for model 1. Contents of FMSG:
+ 
+ AN ERROR WAS FOUND IN THE CONTROL STATEMENTS.
+ 
+AN ERROR WAS FOUND ON LINE 30 AT THE APPROXIMATE POSITION NOTED:
+ $DES DADT(1) = -K10*A(1) -K12*A(1) +K21*A(2) ; ODE for central    compartment
+                                            X
+ THE CHARACTERS IN ERROR ARE: 2
+  159  NO SUCH COMPARTMENT HAS BEEN DEFINED.
+
