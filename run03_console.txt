@@ -5,33 +5,37 @@ Starting NMTRAN
  WARNINGS AND ERRORS (IF ANY) FOR PROBLEM    1
              
  (WARNING  2) NM-TRAN INFERS THAT THE DATA ARE POPULATION.
-  
-Note: Analytical 2nd Derivatives are constructed in FSUBS but are never used.
-      You may insert $ABBR DERIV2=NO after the first $PROB to save FSUBS construction and compilation time
-  
+             
+ (WARNING  79) SIGMA IS USED ON THE RIGHT. WITH A SUBSEQUENT RUN, IF AN
+ INITIAL ESTIMATE OF A DIAGONAL BLOCK OF SIGMA IS TO BE COMPUTED BY
+ NONMEM, THAT BLOCK WILL BE SET TO AN IDENTITY MATRIX DURING THAT
+ COMPUTATION. THIS COULD LEAD TO AN ARITHMETIC EXCEPTION.*
+
+ * THE MAXIMUM NUMBER OF WARNINGS OF ONE OR MORE TYPES WAS REACHED.
+ IT IS POSSIBLE THAT SOME WARNING MESSAGES WERE SUPPRESSED.
 Recompiling certain components
 Building NONMEM Executable
 Starting nonmem execution ...
 License Registered to: Erwin DREESEN KU Leuven
 Expiration Date:    25 JAN 2026
-Current Date:       22 DEC 2025
-Days until program expires :  38
+Current Date:       29 DEC 2025
+Days until program expires :  31
 
 
  First Order Conditional Estimation with Interaction
  MONITORING OF SEARCH:
 
 
-0ITERATION NO.:    0    OBJECTIVE VALUE:   49893.1590669527        NO. OF FUNC. EVALS.:   7
+0ITERATION NO.:    0    OBJECTIVE VALUE:   28306.3601196486        NO. OF FUNC. EVALS.:   7
  CUMULATIVE NO. OF FUNC. EVALS.:        7
- NPARAMETR:  1.2000E-02  1.0000E+00  4.4500E+00  2.0000E-01  2.0000E-01  5.0000E-02  5.0000E-02
- PARAMETER:  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01
- GRADIENT:  -6.1940E+00  1.3435E-01 -1.4177E+03 -3.5204E+04 -4.2043E+01 -1.4805E-02 -1.3573E+03
+ NPARAMETR:  7.5000E-01  4.0000E-02  5.1600E+00  2.3700E-01  1.6700E-01  5.0000E-09
+ PARAMETER:  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01
+ GRADIENT:  -1.7436E+02  1.7115E-01 -1.4719E+02 -1.7633E+02 -1.0792E+04 -1.4552E-07
 0PRED EXIT CODE = 1
-0INDIVIDUAL NO.       1   ID= 1.00000000000000E+00   (WITHIN-INDIVIDUAL) DATA REC NO. 149
+0INDIVIDUAL NO.       1   ID= 1.00000000000000E+00   (WITHIN-INDIVIDUAL) DATA REC NO. 134
  THETA=
-  4.22E+02   7.75E-01   7.76E+00   4.94E-01   9.76E+00
+  4.54E+01   3.98E-02   8.59E+00
  OCCURS DURING SEARCH FOR ETA AT INITIAL VALUE, ETA=0
  ERROR IN LSODA: CODE  -5                                                                                                            
- Elapsed estimation  time in seconds:     9.35
+ Elapsed estimation  time in seconds:     3.78
 Done with nonmem execution
