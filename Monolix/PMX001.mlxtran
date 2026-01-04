@@ -1,0 +1,84 @@
+<DATAFILE>
+
+[FILEINFO]
+file={path='dataset_clean.csv'}
+delimiter = comma
+header={DUMMY, ID, TIME, WEEK, DOSE, RATE, CONC, ADA, BW, ALB, SEX, AGE, CREAT, COL, EVID, BLQ, CONC_M7}
+
+[CONTENT]
+ID = {use=identifier}
+TIME = {use=time}
+DOSE = {use=amount}
+RATE = {use=rate}
+ADA = {use=covariate, type=categorical}
+BW = {use=covariate, type=continuous}
+ALB = {use=covariate, type=continuous}
+SEX = {use=covariate, type=categorical}
+AGE = {use=covariate, type=continuous}
+CREAT = {use=covariate, type=continuous}
+COL = {use=occasion}
+EVID = {use=eventidentifier}
+BLQ = {use=censored}
+CONC_M7 = {use=observation, type=continuous}
+
+<MODEL>
+
+[COVARIATE]
+input = {AGE, ALB, BW, CREAT, SEX}
+
+SEX = {type=categorical, categories={'0', '1'}}
+
+[INDIVIDUAL]
+input = {Cl_pop, omega_Cl, Q_pop, omega_Q, V1_pop, omega_V1, V2_pop, omega_V2}
+
+DEFINITION:
+Cl = {distribution=logNormal, typical=Cl_pop, sd=omega_Cl}
+Q = {distribution=logNormal, typical=Q_pop, sd=omega_Q}
+V1 = {distribution=logNormal, typical=V1_pop, sd=omega_V1}
+V2 = {distribution=logNormal, typical=V2_pop, sd=omega_V2}
+
+[LONGITUDINAL]
+input = {a, b}
+
+file = 'lib:infusion_2cpt_ClV1QV2.txt'
+
+DEFINITION:
+CONC_M7 = {distribution=normal, prediction=Cc, errorModel=combined1(a, b)}
+
+<FIT>
+data = 'CONC_M7'
+model = CONC_M7
+
+<PARAMETER>
+Cl_pop = {value=1.24, method=MLE}
+Q_pop = {value=0.6909999999999999, method=MLE}
+V1_pop = {value=3.146, method=MLE}
+V2_pop = {value=2.851, method=MLE}
+a = {value=1, method=MLE}
+b = {value=0.3, method=MLE}
+c = {value=1, method=FIXED}
+omega_Cl = {value=1, method=MLE}
+omega_Q = {value=1, method=MLE}
+omega_V1 = {value=1, method=MLE}
+omega_V2 = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = {conditionalMean, conditionalMode })
+fim(method = StochasticApproximation)
+logLikelihood(method = ImportanceSampling)
+
+[PLOTS]
+run = true
+plots = {indfits = {selected = true}, parameterdistribution = {selected = true}, obspred = {selected = true}, covariancemodeldiagnosis = {selected = true}, covariatemodeldiagnosis = {selected = true}, vpc = {selected = true}, residualsscatter = {selected = true}, residualsdistribution = {selected = true}, randomeffects = {selected = true}, blq = {selected = true}, saemresults = {selected = true}}
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'PMX001'
+nbsimulations = 2000
+
+INDIVIDUAL:
+optimizationiterations = 2000
+

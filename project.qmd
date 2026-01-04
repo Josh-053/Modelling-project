@@ -1,18 +1,32 @@
 ---
-title: "Untitled"
+title: "Population Pharmacokinetics and Exposure–Response Analysis of PMX001 in Acute Severe Ulcerative Colitis"
 author: "Joshua Ijidakinro, Ali Kazim"
+affiliation: "Faculty of Pharmaceutical Science, KU Leuven"
+date: today
 format: pdf
+execute:
+  echo: true
+  warning: false
+  message: false
 ---
 
-## Quarto
+# Introduction
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+Acute severe ulcerative colitis (ASUC) affects a quarter of patients with ulcerative colitis, either at initial presentation or later in the course of the disease. Acute severe ulcerative colitis represents a medical emergency, with 36% of patients experiencing multiple episodes during their lifetimes, and about 40% requiring colectomy, along with significant morbidity. Corticosteroids are the primary treatment for acute severe ulcerative colitis, yet one in three patients fails to respond. Infliximab and ciclosporin emerged as the second-line rescue treatment options after corticosteroid failure, but with colectomy rates plateauing at about 10%, there is an unmet medical need. 
 
-## Running Code
+# Objectives
+
+The primary aim of this study was to characterize the population pharmacokinetics (popPK) of PMX001 in adult patients with acute severe ulcerative colitis. In addition, the analysis sought to identify and quantify the influence of key clinical and demographic covariates on PMX001 exposure. Finally, the study explored the relationship between PMX001 exposure metrics and colectomy-free survival, with the goal of understanding how drug exposure may impact clinical outcomes in this critically ill patient population. 
+
+# Methods
+
+## Data Preparation
 
 ```{r}
+#| include: false
 library(ggplot2)
 library(tidyverse)
+library(Hmisc)
 ```
 
 ```{r}
@@ -20,6 +34,8 @@ data <- read.table("dataset.txt",
                   sep = " ",        # space-separated
                   na.strings = ".", # treat "." as NA
                   header = TRUE)
+
+LLOQ <- 1                           # mg/L
 
 data <- data %>%
   mutate(DOSE = as.numeric(DOSE),
@@ -29,19 +45,193 @@ data <- data %>%
            is.na(CONC) & is.na(DOSE) ~ 2),
          BLQ = case_when(
            CONC<1 ~ 1,
-           CONC>=1 ~ 0))
+           CONC>=1 ~ 0,
+           is.na(CONC) ~ 0),
+         CONC_M7 = ifelse(CONC < 1, 0, CONC))
          
 data <- data %>% group_by(ID) %>%  
-  fill(c(BW),.direction = "downup") %>% 
+  fill(c(BW),.direction = "downup") %>%
+  fill(c(ALB),.direction = "downup") %>%
+  fill(c(CREAT),.direction = "downup") %>%
   ungroup()
 
-data$AMT = data$DOSE * data$BW
 
-write.table(data, file = "dataset_clean.txt", quote = FALSE, sep = " ", na = ".")
+data <- data %>%
+  group_by(ID) %>%
+  arrange(TIME, .by_group = TRUE) %>%
+  mutate(ADA = case_when(
+    ID %in% 71:75 ~ as.integer(cumany(ADA == 1)),
+    TRUE          ~ ADA)) %>%
+  ungroup()
+
+
+data$DOSE = data$DOSE * data$BW # dose (mg) = dose (mg/kg) * body weight (kg)
+
+# write.table(data, file = "dataset_clean.txt", quote = FALSE, sep = " ", na = ".")
 write.csv(data, file = "dataset_clean.csv", quote = FALSE, na = ".", row.names = FALSE)
 ```
 
+Data from a Phase 1/2 study of the investigational medicinal product PMX001 was collected for **`r length(unique(data$ID))` adult patients** with acute severe ulcerative colitis over the course of **`r length(unique(data$WEEK))` weeks**. In this study, patients received four times one dose of 3, 6 or 9 mg/kg per two weeks. This data was processed in R (version 4.5.2). Plasma concentrations (in mg/L) were measured using enzyme-linked immuno-sorbent assay (ELISA), which had a lower limit of quantification of 1.0 mg/L. 
+
+Below-limit-of-quantification (BLQ) observations were handled using the M7+ method during the model development. The M3 method was investigated for the final PopPK model. Parameter estimates for the model development followed an iterative approach comprising at least three iterations. This approach was executed for both the base and the covariate model development.
+
+Population pharmacokinetic (PopPK) modeling was conducted using NONMEM, with model execution and workflow management supported by Pirana and Perl-speaks-NONMEM (PsN). Based on the censored dataset, a two-compartment base model with linear elimination was constructed. 
+
+Covariate selection was performed using the enhanced stepswise covariate model (in short, SCM+) algorithm integrated in PsN. The covariates in the dataset were as follows: antidrug antibody (= immunogenicity, `ADA`), age, serum albumin concentration (`ALB`), body weight (`BW`), serum creatinine concentration (`CREAT`), and sex. Model robustness and parameter precision were assessed through nonparametric bootstrap analysis with 2000 replicates; in cases of computational limitations, 1000 replicates were used, which provide comparable precision. Predictive performance was evaluated using visual predictive checks (VPC) based on 1000 simulated datasets. 
+
+## Running Code
+
+```{r spearman correlation matrix all R}
+datacor <- data %>%
+     select(ADA, AGE, ALB, BW, CREAT, COL, SEX)
+rcorr(as.matrix(datacor), type = "spearman")$r %>%
+  signif(digits = 3)
+```
+
+```{r spearman correlation matrix all p}
+rcorr(as.matrix(datacor), type = "spearman")$P %>%
+  signif(digits = 3)
+```
+
+```{r dataset general info}
+length(unique(data$ID))
+```
+
+{{< pagebreak >}} 
+
+## Model File
 
 ```{fortran}
-# add the final model here
+#| eval: false
+;; 1. Based on: run02
+;; 2. Description: PMX001 2CMT LINEAR M7+ (COV MODEL)
+;; x1. Joshua I., Ali K.
+;; 2025-12-29
+
+$PROBLEM PMX001 Two Compartment
+
+$INPUT DUMMY=DROP ID TIME WEEK DOSE=AMT RATE CONC=DV ADA BW ALB SEX AGE CREAT COL EVID BLQ
+
+$DATA dataset_clean.csv IGNORE=@
+
+$ABBR DERIV2=NO
+
+$SUBROUTINES
+ADVAN13 ; general nonlinear model
+TOL=9   ; tolerance for $DES, higher TOL: more accurate, but slower computation
+        ; TOL=9 -> DES will aim for accuracy of 1E-9 for each integration step
+
+$MODEL
+NCOMP=2                      ; number of compartments
+COMP=(DOSE, DEFDOSE, DEFOBS) ; first (central) compartment
+COMP=(PERIPH)                ; second (peripheral) compartment
+
+$PK
+;; time after last dose
+IF (EVID.EQ.1) LASTDOSE = TIME
+TAD = TIME - LASTDOSE
+
+;; typical values
+ TVCL = THETA(1)
+ TVV1 = THETA(2)
+ TVV2 = THETA(3)
+  TVQ = THETA(4)
+
+;; covariate determined from SCM+ based on base model
+IF(ADA.EQ.0) V1ADA = 1               ; Most common
+IF(ADA.EQ.1) V1ADA = ( 1 + THETA(5))
+V1COV = V1ADA  
+
+;; individual values
+   CL = TVCL * EXP(ETA(1))
+   V1 = TVV1 * EXP(ETA(2)) * V1COV
+   V2 = TVV2
+    Q = TVQ
+
+;; derived parameters
+  K10 = CL/V1
+  K12 = Q/V1
+  K21 = Q/V2
+
+;; scaling factors
+   S1 = V1/1 ; scale prediction based on DOSE (mmol) and CONC (mmol/L)
+   S2 = V2/1
+
+$THETA ; values are determined in 3 iterations
+(0.01,  1.32,   3)   ; CL (L/d) [1]
+(0.01,  4.7,    8)   ; V1 (L) [2,3]
+(0.01,  0.232,  1)   ; V2 (L)
+(0.001, 0.0574, 1.5) ; Q  (L/d)
+(-1,    7.86,   20)  ; V1ADA
+
+$DES DADT(1) = -K10*A(1) -K12*A(1) +K21*A(2) ; ODE for central    compartment
+     DADT(2) =            K12*A(1) -K21*A(2) ; ODE for peripheral compartment
+     
+$ERROR
+IPRED = F
+LLOQ = 1  ; (mg/L)
+
+;; residual error standard deviations
+PROP_SD = SIGMA(1)
+ADD_SD  = SIGMA(2)
+
+;; BLQ inflation for M7+ censoring method
+IF (BLQ.EQ.1) ADD_SD = ADD_SD + LLOQ
+
+;; final residual error
+W = SQRT(ADD_SD**2+PROP_SD**2)
+
+IF (W.LE.0.000001) W=0.000001 ; Protective code
+
+IRES=CONC-IPRED
+IWRES=IRES/W
+Y = IPRED * (1 + EPS(1)) + EPS(2)
+
+$OMEGA ; interindividual variability
+0.539  ; IIV CL
+0.235  ; IIV V
+
+$SIGMA          ; residual variability
+0.131           ; EPS(1), proportional
+0.000000005 FIX ; EPS(2); additive, required by M7+ censoring method
+
+$EST
+METHOD=1 INTERACTION; FOCE-I
+MAXEVAL=9999
+SIG=3
+PRINT=5
+
+$COVARIANCE PRINT=E UNCONDITIONAL MATRIX=S
+
+$TABLE ; output table
+ID TIME TAD DV EVID PRED IPRED WRES IWRES RES IRES CWRES CL V1 V2 Q K10 K12 K21 ADASEX COL BW ALB AGE CREAT NOPRINT ONEHEADER FILE=run06
+
+;; REFERENCES
+;; 1) https://www.ncbi.nlm.nih.gov/books/NBK557889/
+;; 2) https://pmc.ncbi.nlm.nih.gov/articles/PMC8301575/
+;; 3) https://ascpt.onlinelibrary.wiley.com/doi/abs/10.1016/j.clpt.2004.12.212
 ```
+```{r}
+run06 <- read.table (file='run06', skip=1, header=T)
+```
+
+```{r}
+ggplot (run06 %>% filter(CONC > 1)) + # CWRES used because of FOCE-I
+  geom_point (aes(x=PRED, y=CWRES),  colour='darkblue') +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  xlab('PRED') +
+  ylab('WRES')
+
+ggplot (run06 %>% filter(CONC > 1)) +
+  geom_point (aes(x=PRED, y=CONC),  colour='darkblue') +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  xlab('PRED') +
+  ylab('CONC')
+
+ggplot (run06 %>% filter(CONC > 1)) + # no
+  geom_point (aes(x=TAD, y=CWRES),  colour='darkblue') +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  xlab('PRED') +
+  ylab('WRES')
+```
+

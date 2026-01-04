@@ -1,0 +1,8 @@
+[PROPERTIES]
+outputplot%3ACONC_M7%3A0\censObservations=false
+outputplot%3ACONC_M7%3A0\obsLines=false
+outputplot%3ACONC_M7%3A0\obsMean=true
+outputplot%3ACONC_M7%3A0\yLog=true
+
+[SETTINGS]
+outputplot%3ACONC_M7%3A0\timeAfterLastDose=true

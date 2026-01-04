@@ -43,7 +43,7 @@ perc_BLQ <- mean(conc < LLOQ) * 100
 perc_BLQ
 
 ## recommended BLQ handling method: M7+ (little bias, even at higher %BLQ)
-## also recommended: M3 method
+## also recommended: M3 method after building final model
 
 ===vergeet even de lijnen hieronder, moet ze nog nakijken!!===
 
