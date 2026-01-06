@@ -27,6 +27,8 @@ The primary aim of this study was to characterize the population pharmacokinetic
 library(ggplot2)
 library(tidyverse)
 library(Hmisc)
+library(PMXForest)
+library(patchwork)
 ```
 
 ```{r}
@@ -77,7 +79,7 @@ Below-limit-of-quantification (BLQ) observations were handled using the M7+ meth
 
 Population pharmacokinetic (PopPK) modeling was conducted using NONMEM, with model execution and workflow management supported by Pirana and Perl-speaks-NONMEM (PsN). Based on the censored dataset, a two-compartment base model with linear elimination was constructed. 
 
-Covariate selection was performed using the enhanced stepswise covariate model (in short, SCM+) algorithm integrated in PsN. The covariates in the dataset were as follows: antidrug antibody (= immunogenicity, `ADA`), age, serum albumin concentration (`ALB`), body weight (`BW`), serum creatinine concentration (`CREAT`), and sex. Model robustness and parameter precision were assessed through nonparametric bootstrap analysis with 2000 replicates; in cases of computational limitations, 1000 replicates were used, which provide comparable precision. Predictive performance was evaluated using visual predictive checks (VPC) based on 1000 simulated datasets. 
+Covariate selection was performed using the enhanced stepswise covariate model (in short, SCM+) algorithm integrated in PsN. The covariates in the dataset were as follows: antidrug antibody (= immunogenicity, `ADA`), age, serum albumin concentration (`ALB`), body weight (`BW`), serum creatinine concentration (`CREAT`), and sex. Covariates that were significantly correlated with the PK parameters, were assessed for clinical relevance using a forest plot, generated from the R package `PMXForest`. Model robustness and parameter precision were assessed through nonparametric bootstrap analysis with 2000 replicates; in cases of computational limitations, 1000 replicates were used, which provide comparable precision. Predictive performance was evaluated using visual predictive checks (VPC) based on 1000 simulated datasets. 
 
 ## Running Code
 
@@ -211,27 +213,125 @@ ID TIME TAD DV EVID PRED IPRED WRES IWRES RES IRES CWRES CL V1 V2 Q K10 K12 K21 
 ;; 2) https://pmc.ncbi.nlm.nih.gov/articles/PMC8301575/
 ;; 3) https://ascpt.onlinelibrary.wiley.com/doi/abs/10.1016/j.clpt.2004.12.212
 ```
+
+# Covariate Relevance: Forest Plot
+This section adds a forest plot to assess the relevance of key covariates (CREAT, SEX, ALB, BW, ADA, AGE) on exposure in the cleaned dataset.
+
 ```{r}
-run06 <- read.table (file='run06', skip=1, header=T)
+library(PMXForest)
+library(ggplot2)
+
+theme_set(theme_bw())
+
+ALB_REF_CL <- 31.88
+ALB_REF_V <- 31.85
+BW_REF_V  <- 65.93
+
+cs <- PMXForest::getCovStats(
+  data,
+  covariates = c("ALB","BW","CREAT"),
+  minLevels  = 10,
+  probs      = c(0.05, 0.95),
+  idVar      = "ID",
+  missVal    = -99,
+  nsig       = 3
+)
+
+dfCovs <- PMXForest::createInputForestData(list(
+  ADA = c(0, 1),
+  ALB = c(cs$ALB["5%"], cs$ALB["95%"]),
+  BW  = c(cs$BW["5%"],  cs$BW["95%"]),
+  CREAT = c(cs$CREAT["5%"],  cs$CREAT["95%"])
+))
+
+covnames <- c(
+  "ADA negative","ADA positive",
+  "ALB 27 g/L","ALB 35 g/L",
+  "BW 49.4 kg","BW 76.9 kg",
+  "CREAT 0.45 L/d", "CREAT 1.54 L/d"
+)
+
+covariateGroupNames <- c("ADA","Albumin","Body weight","Clearance")
+
+functionListName <- c("CL","V")
+
+# ---- Helpers (copy as-is) ----
+.once_log <- local({ .done <- FALSE; function(expr) { if (!.done) { .done <<- TRUE; force(expr) } } })
+.normalize_thetas <- function(thetas) {
+  if (is.data.frame(thetas)) thetas <- unlist(thetas, use.names = TRUE)
+  if (is.matrix(thetas))     thetas <- as.vector(thetas)
+  nm <- names(thetas)
+  if (is.null(nm) || any(is.na(nm)) || all(nm == "")) nm <- paste0("THETA", seq_along(thetas))
+  nm <- toupper(nm); nm <- gsub("\\s+", "", nm); nm <- gsub("[()]", "", nm); nm <- gsub("[^A-Z0-9_]", "", nm)
+  names(thetas) <- nm
+  thetas
+}
+.get_theta <- function(thetas, k) {
+  nm <- names(thetas)
+  candidates <- c(paste0("THETA", k), paste0("THETA(", k, ")"), paste0("THETA.", k), paste0("THETA_", k), paste0("THETA", k, "."))
+  for (c in candidates) { idx <- match(c, nm, nomatch = 0); if (idx > 0) return(unname(thetas[[idx]])) }
+  if (length(thetas) >= k) return(unname(thetas[[k]]))
+  stop(sprintf("Theta %d not found in 'thetas'. Available names: %s", k, paste(nm, collapse = ", ")))
+}
 ```
 
 ```{r}
-ggplot (run06 %>% filter(CONC > 1)) + # CWRES used because of FOCE-I
-  geom_point (aes(x=PRED, y=CWRES),  colour='darkblue') +
-  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
-  xlab('PRED') +
-  ylab('WRES')
+# ---- Your covariate functions (robust) ----
+f_CL <- function(thetas, df, ...) {
+  thetas <- .normalize_thetas(thetas)
+  .once_log(message("f_CL: thetas names = ", paste(names(thetas), collapse = ", ")))
+  ADA <- df[["ADA"]]
+  TH3 <- .get_theta(thetas, 3)
+  CLADA <- if (ADA == 0) 1 else (1 + TH3)
+  CLADA
+}
 
-ggplot (run06 %>% filter(CONC > 1)) +
-  geom_point (aes(x=PRED, y=CONC),  colour='darkblue') +
-  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
-  xlab('PRED') +
-  ylab('CONC')
+f_V <- function(thetas, df, ...) {
+  thetas <- .normalize_thetas(thetas)
+  .once_log(message("f_V1: thetas names = ", paste(names(thetas), collapse = ", ")))
+  ADA <- df[["ADA"]]; ALB <- df[["ALB"]]; BW <- df[["BW"]]; CREAT <- df[["CREAT"]]
+  TH4 <- .get_theta(thetas, 4)
+  TH5 <- .get_theta(thetas, 5)
+  TH6 <- .get_theta(thetas, 6)
+  TH7 <- .get_theta(thetas, 7)
+  VADA <- if (ADA == 0) 1 else (1 + TH4)
+  VALB <- 1 + TH5 * (ALB - ALB_REF_V)
+  VBW  <- 1 + TH6 * (BW - BW_REF_V)
+  VCREAT <- (1 + TH7 * (CREAT - 1.03))
+  VADA * VALB * VBW * VCREAT
+}
 
-ggplot (run06 %>% filter(CONC > 1)) + # no
-  geom_point (aes(x=TAD, y=CWRES),  colour='darkblue') +
-  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
-  xlab('PRED') +
-  ylab('WRES')
+# ---- Data & parameters ----
+extFile <- "final_backward_3.ext"
+covFile <- "final_backward_3.cov"
+
+dfSamplesCOV <- getSamples(covFile, extFile, n = 1000)
+
+# Optional but recommended: normalize column names at the source
+nm <- names(dfSamplesCOV)
+nm <- toupper(nm); nm <- gsub("\\s+", "", nm); nm <- gsub("[()]", "", nm); nm <- gsub("[^A-Z0-9_]", "", nm)
+names(dfSamplesCOV) <- nm
+
+
+# ---- Compute ----
+dfresCOV <- getForestDFSCM(
+  dfCovs           = dfCovs,
+  cdfCovsNames     = covnames,
+  functionList     = list(f_CL, f_V),
+  functionListName = functionListName,
+  noBaseThetas     = 9,
+  dfParameters     = dfSamplesCOV,
+  iMiss            = -99
+)
+```
+
+```{r}
+F1 <- forestPlot(dfresCOV,parameters= c("CL", "V"),
+           groupNameLabels    = covariateGroupNames,
+           referenceInfo      = "Reference: (CL) ADA = 0 (negative), ALB = 31.88 g/L; (V1) ALB = 31.85, BW = 65.93 kg",
+           noVar              = 4,
+           size = theme_get()$text$size * 0.92,
+           tabTextSize = 10)
+ggsave("PMXForestSCMPlus.png", plot = F1, width = 11, height = 7, units = "in")
 ```
 

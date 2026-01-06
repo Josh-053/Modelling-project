@@ -76,3 +76,29 @@ TVCL = 0.157 L/d /24 h/d
 
 bioavailability = 58% (https://ascpt.onlinelibrary.wiley.com/doi/abs/10.1016/j.clpt.2004.12.212)
 CL = CL/F * F = 0.0187 * 0.58 = 0.010846
+
+
+
+```{r}
+run06 <- read.table (file='run06', skip=1, header=T)
+```
+
+```{r}
+ggplot (run06 %>% filter(CONC > 1)) + # CWRES used because of FOCE-I
+  geom_point (aes(x=PRED, y=CWRES),  colour='darkblue') +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  xlab('PRED') +
+  ylab('WRES')
+
+ggplot (run06 %>% filter(CONC > 1)) +
+  geom_point (aes(x=PRED, y=CONC),  colour='darkblue') +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  xlab('PRED') +
+  ylab('CONC')
+
+ggplot (run06 %>% filter(CONC > 1)) + # no
+  geom_point (aes(x=TAD, y=CWRES),  colour='darkblue') +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  xlab('PRED') +
+  ylab('WRES')
+```

@@ -1,0 +1,31 @@
+Pathlist information for compiler and MPI systems are located in nmpathlist.txt
+
+Starting NMTRAN
+  
+ WARNINGS AND ERRORS (IF ANY) FOR PROBLEM    1
+             
+ (WARNING  2) NM-TRAN INFERS THAT THE DATA ARE POPULATION.
+             
+ (WARNING  79) SIGMA IS USED ON THE RIGHT. WITH A SUBSEQUENT RUN, IF AN
+ INITIAL ESTIMATE OF A DIAGONAL BLOCK OF SIGMA IS TO BE COMPUTED BY
+ NONMEM, THAT BLOCK WILL BE SET TO AN IDENTITY MATRIX DURING THAT
+ COMPUTATION. THIS COULD LEAD TO AN ARITHMETIC EXCEPTION.*
+
+ * THE MAXIMUM NUMBER OF WARNINGS OF ONE OR MORE TYPES WAS REACHED.
+ IT IS POSSIBLE THAT SOME WARNING MESSAGES WERE SUPPRESSED.
+Recompiling certain components
+Building NONMEM Executable
+Starting nonmem execution ...
+License Registered to: Erwin DREESEN KU Leuven
+Expiration Date:    25 JAN 2026
+Current Date:        5 JAN 2026
+  **** WARNING!!! Days until program expires :  20 ****
+  **** CONTACT idssoftware@iconplc.com FOR RENEWAL ****
+
+
+ First Order Conditional Estimation with Interaction (Evaluation)
+ OBJECTIVE FUNCTION VALUE:    11240.737540552753     
+ Elapsed evaluation  time in seconds:     1.72
+ Elapsed postprocess time in seconds:     2.09
+ Elapsed finaloutput time in seconds:     0.35
+Done with nonmem execution

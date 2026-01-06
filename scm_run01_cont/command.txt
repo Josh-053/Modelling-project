@@ -1,0 +1,1 @@
+/usr/local/bin/scmplus run01cont.scm -fast -dir=scm_run01_cont

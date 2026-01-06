@@ -1,63 +1,58 @@
 ;; 1. Based on: run02
-;; 2. Description: PMX001 2CMT LINEAR M7+ (COV MODEL)
+;; 2. Description: PMX001 2CMT LINEAR M7+ (FINAL MODEL)
 ;; Joshua I., Ali K.
-;; 2025-12-29
+;; 2026-01-05
 
-$PROBLEM PMX001 Two Compartment
+$PROBLEM    PMX001 Two Compartment
 
-$INPUT DUMMY=DROP ID TIME WEEK DOSE=AMT RATE CONC=DROP ADA BW ALB SEX AGE CREAT COL EVID BLQ CONC_M7=DV
+$INPUT      DUMMY=DROP ID TIME WEEK DOSE=AMT RATE CONC=DROP ADA BW ALB SEX AGE CREAT COL EVID BLQ CONC_M7=DV
 
-$DATA dataset_clean.csv IGNORE=@
+$DATA       dataset_clean.csv IGNORE=@
 
-$ABBR DERIV2=NO
+$ABBR       DERIV2=NO
 
-$SUBROUTINES
-ADVAN13 ; general nonlinear model
-TOL=9   ; tolerance for $DES, higher TOL: more accurate, but slower computation
-        ; TOL=9 -> DES will aim for accuracy of 1E-9 for each integration step
+$SUBROUTINE ADVAN13 ; general nonlinear model
+            TOL=9 ; tolerance for $DES,higher TOL: more accurate,but slower computation
 
-$MODEL
-NCOMP=2                      ; number of compartments
-COMP=(DOSE, DEFDOSE, DEFOBS) ; first (central) compartment
-COMP=(PERIPH)                ; second (peripheral) compartment
+$MODEL      NCOMP=2 ; number of compartments
+            COMP=(DOSE,DEFDOSE,DEFOBS) ; first (central) compartment
+            COMP=(PERIPH) ; second (peripheral) compartment
 
 $PK
-;; time after last dose
+;; time after dose
 IF (EVID.EQ.1) LASTDOSE = TIME
 TAD = TIME - LASTDOSE
 
 ;; typical values
- TVCL = THETA(1)
- TVV1 = THETA(2)
- TVV2 = THETA(3)
-  TVQ = THETA(4)
+TVCL = THETA(1)
+TVV1 = THETA(2)
+TVV2 = THETA(3)
+ TVQ = THETA(4)
 
-;; covariate determined from SCM+ based on base model
-IF(ADA.EQ.0) CLADA = 1               ; Most common
-IF(ADA.EQ.1) CLADA = ( 1 + THETA(5))
-CLCOV = CLADA  
+;; covariate effects on clearance (CL)
+IF(ADA.EQ.0)     CLADA = 1                             ; ADA on CL; ADA=O is most common
+IF(ADA.EQ.1)     CLADA = ( 1 + THETA(5))
 
 ;; individual values
-   CL = TVCL * EXP(ETA(1)) * CLCOV
-   V1 = TVV1 * EXP(ETA(2))
-   V2 = TVV2
-    Q = TVQ
+  CL = TVCL * EXP(ETA(1)) * CLADA 
+  V1 = TVV1 * EXP(ETA(2))
+  V2 = TVV2
+   Q = TVQ
+ 
+ K10 = CL/V1
+ K12 = Q/V1
+ K21 = Q/V2
+ 
+  S1 = V1/1 ; scale prediction based on DOSE (mg) and DV (mg/L)
+  S2 = V2/1
 
-;; derived parameters
-  K10 = CL/V1
-  K12 = Q/V1
-  K21 = Q/V2
+$THETA  ; values are determined in 3 iterations
+(0.001, 1.19,      8) ; TVCL (L/d) [1]
+(0.001, 4.66,     10) ; TVV1 (L) [2,3] 
+(0.01,  0.485,     6) ; TVV2 (L)
+(0.001, 3.32,      6) ; TVQ (L/d)
 
-;; scaling factors
-   S1 = V1/1 ; scale prediction based on DOSE (mmol) and CONC (mmol/L)
-   S2 = V2/1
-
-$THETA ; values are determined in 3 iterations
-(0.01,  1.32,   3)   ; [1]   TVCL (L/h)
-(0.01,  4.68,   8)   ; [2,3] TVV1 (L)
-(0.01,  0.226,  1)   ; V2
-(0.001, 0.0546, 1.5) ; Q
-(-1,    0.466,  5)   ; CLADA
+(0,     4.72,     15) ; CLADA1
 
 $DES DADT(1) = -K10*A(1) -K12*A(1) +K21*A(2) ; ODE for central    compartment
      DADT(2) =            K12*A(1) -K21*A(2) ; ODE for peripheral compartment
@@ -82,13 +77,13 @@ IRES=DV-IPRED
 IWRES=IRES/W
 Y = IPRED * (1 + EPS(1)) + EPS(2)
 
-$OMEGA ; interindividual variability
-0.539  ; IIV CL
-0.235  ; IIV V
+$OMEGA
+0.716  ; IIV CL
+0.237  ; IIV V1
 
-$SIGMA          ; residual variability
-0.131           ; EPS(1), proportional
-0.000000005 FIX ; EPS(2); additive, required by M7+ censoring method
+$SIGMA      ; residual variability
+0.283    ; EPS(1), proportional
+5E-13  FIX  ; EPS(2), additive; required by M7+ censoring method
 
 $EST
 METHOD=1 INTERACTION; FOCE-I
@@ -98,8 +93,20 @@ PRINT=5
 
 $COVARIANCE PRINT=E UNCONDITIONAL MATRIX=S
 
-$TABLE ; output table
-ID TIME TAD DV EVID PRED IPRED WRES IWRES RES IRES CWRES CL V1 V2 Q K10 K12 K21 ADA SEX COL BW ALB AGE CREAT NOPRINT ONEHEADER FILE=run06
+$TABLE ; output table for standard outcomes
+ID TIME TAD DV EVID PRED IPRED WRES IWRES RES IRES CWRES NOPRINT ONEHEADER FILE=run06_sdtab
+
+$TABLE ; output table for PK parameters
+ID CL V1 V2 Q K10 K12 K21 NOPRINT NOAPPEND ONEHEADER FILE=run06_patab
+
+$TABLE ; output table for categorical covariates
+ID ADA SEX COL NOPRINT NOAPPEND ONEHEADER FILE=run06_catab
+
+$TABLE ; output table for continuous covariates
+ID BW ALB AGE CREAT NOPRINT NOAPPEND ONEHEADER FILE=run06_cotab
+
+$TABLE ; output table for parameters and covariates
+ID CL V1 V2 Q K10 K12 K21 ADA SEX COL BW ALB AGE CREAT NOPRINT NOAPPEND ONEHEADER FILE=run06_pa_cov
 
 ;; REFERENCES
 ;; 1) https://www.ncbi.nlm.nih.gov/books/NBK557889/

@@ -1,4 +1,4 @@
-vr 02 jan 2026 20:40:58 CET
+ma 05 jan 2026 13:48:55 CET
 ;; 1. Based on: run01
 ;; 2. Description: PMX001 1CMT LINEAR M7+
 ;; Joshua I., Ali K.
@@ -53,7 +53,7 @@ $SIGMA  0.295  ; EPS(1), proportional
  5E-13  FIX  ;     EPS(2)  ; additive, required by M7+ censoring method
  ; residual variability
 $ESTIMATION METHOD=1 INTERACTION ; FOCE-I
-            MAXEVAL=9999 SIG=3 PRINT=5
+            MAXEVAL=9999 SIG=3 SIGL=3 PRINT=5
 $COVARIANCE PRINT=E UNCONDITIONAL MATRIX=S
  ; output table for standard outcomes
 $TABLE      ID TIME DV EVID PRED IPRED WRES IWRES RES IRES CWRES
@@ -90,8 +90,8 @@ NM-TRAN MESSAGES
 
 License Registered to: Erwin DREESEN KU Leuven
 Expiration Date:    25 JAN 2026
-Current Date:        2 JAN 2026
-  **** WARNING!!! Days until program expires :  23 ****
+Current Date:        5 JAN 2026
+  **** WARNING!!! Days until program expires :  20 ****
   **** CONTACT idssoftware@iconplc.com FOR RENEWAL ****
 1NONLINEAR MIXED EFFECTS MODEL PROGRAM (NONMEM) VERSION 7.6.0 (nm760)
  ORIGINALLY DEVELOPED BY STUART BEAL, LEWIS SHEINER, AND ALISON BOECKMANN
@@ -281,9 +281,9 @@ Current Date:        2 JAN 2026
  MAP (ETAHAT) ESTIMATION METHOD (OPTMAP):   0
  ETA HESSIAN EVALUATION METHOD (ETADER):    0
  INITIAL ETA FOR MAP ESTIMATION (MCETA):    0
- SIGDIGITS FOR MAP ESTIMATION (SIGLO):      100
+ SIGDIGITS FOR MAP ESTIMATION (SIGLO):      3
  GRADIENT SIGDIGITS OF
-       FIXED EFFECTS PARAMETERS (SIGL):     100
+       FIXED EFFECTS PARAMETERS (SIGL):     3
  NOPRIOR SETTING (NOPRIOR):                 0
  NOCOV SETTING (NOCOV):                     OFF
  DERCONT SETTING (DERCONT):                 OFF
@@ -324,65 +324,58 @@ Current Date:        2 JAN 2026
  MONITORING OF SEARCH:
 
 
-0ITERATION NO.:    0    OBJECTIVE VALUE:   11240.6277955132        NO. OF FUNC. EVALS.:   5
+0ITERATION NO.:    0    OBJECTIVE VALUE:   11240.7442181084        NO. OF FUNC. EVALS.:   5
  CUMULATIVE NO. OF FUNC. EVALS.:        5
  NPARAMETR:  1.4600E+00  4.8800E+00  5.8400E-01  1.9300E-01  2.9500E-01
  PARAMETER:  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01
- GRADIENT:   3.9537E+00  6.1762E-01  6.6896E-02 -3.1793E-01  3.9496E+00
+ GRADIENT:  -1.6479E+01  1.2157E+01 -1.2791E-02 -4.9488E-01  7.3561E+00
 
-0ITERATION NO.:    5    OBJECTIVE VALUE:   11240.6265826938        NO. OF FUNC. EVALS.:  54
- CUMULATIVE NO. OF FUNC. EVALS.:       59
- NPARAMETR:  1.4585E+00  4.8837E+00  5.8377E-01  1.9359E-01  2.9452E-01
- PARAMETER:  9.8733E-02  1.0147E-01  9.9804E-02  1.0153E-01  9.9185E-02
- GRADIENT:  -5.9573E-02  5.8208E-02 -1.2189E-02  7.1291E-02 -1.3917E+00
-
-0ITERATION NO.:   10    OBJECTIVE VALUE:   11240.6263774578        NO. OF FUNC. EVALS.:  55
- CUMULATIVE NO. OF FUNC. EVALS.:      114
- NPARAMETR:  1.4591E+00  4.8832E+00  5.8379E-01  1.9348E-01  2.9466E-01
- PARAMETER:  9.9249E-02  1.0129E-01  9.9821E-02  1.0124E-01  9.9421E-02
- GRADIENT:   1.0354E-02  4.0146E-03 -2.3177E-03  1.3554E-04 -2.3116E-02
-
-0ITERATION NO.:   11    OBJECTIVE VALUE:   11240.6263774578        NO. OF FUNC. EVALS.:   6
- CUMULATIVE NO. OF FUNC. EVALS.:      120
- NPARAMETR:  1.4591E+00  4.8832E+00  5.8379E-01  1.9348E-01  2.9466E-01
- PARAMETER:  9.9249E-02  1.0129E-01  9.9821E-02  1.0124E-01  9.9421E-02
- GRADIENT:   1.0354E-02  4.0146E-03 -2.3177E-03  1.3554E-04 -2.3116E-02
+0ITERATION NO.:    5    OBJECTIVE VALUE:   11240.7375429450        NO. OF FUNC. EVALS.:  66
+ CUMULATIVE NO. OF FUNC. EVALS.:       71
+ NPARAMETR:  1.4620E+00  4.8770E+00  5.8407E-01  1.9306E-01  2.9470E-01
+ PARAMETER:  1.0165E-01  9.8798E-02  1.0000E-01  1.0005E-01  9.9470E-02
+ GRADIENT:   7.6483E+00  1.1186E+01 -1.9504E-01 -1.2506E+00 -9.6901E+00
+ NUMSIGDIG:         3.7         3.4         2.8         2.6         3.5
 
  #TERM:
-0MINIMIZATION SUCCESSFUL
- NO. OF FUNCTION EVALUATIONS USED:      120
- NO. OF SIG. DIGITS IN FINAL EST.:  4.1
+0MINIMIZATION TERMINATED
+ DUE TO ROUNDING ERRORS (ERROR=134)
+ NO. OF FUNCTION EVALUATIONS USED:       71
+ NO. OF SIG. DIGITS IN FINAL EST.:  2.6
+ ADDITIONAL PROBLEMS OCCURRED WITH THE MINIMIZATION.
+ REGARD THE RESULTS OF THE ESTIMATION STEP CAREFULLY, AND ACCEPT THEM ONLY
+ AFTER CHECKING THAT THE COVARIANCE STEP PRODUCES REASONABLE OUTPUT.
 
  ETABAR IS THE ARITHMETIC MEAN OF THE ETA-ESTIMATES,
  AND THE P-VALUE IS GIVEN FOR THE NULL HYPOTHESIS THAT THE TRUE MEAN IS 0.
 
- ETABAR:        -1.5691E-04 -9.6967E-04
- SE:             8.7811E-02  4.9898E-02
+ ETABAR:        -2.0687E-03  7.7185E-04
+ SE:             8.7837E-02  4.9920E-02
  N:                      75          75
 
- P VAL.:         9.9857E-01  9.8450E-01
+ P VAL.:         9.8121E-01  9.8766E-01
 
- ETASHRINKSD(%)  4.7042E-01  1.7587E+00
- ETASHRINKVR(%)  9.3863E-01  3.4864E+00
- EBVSHRINKSD(%)  4.5557E-01  1.7478E+00
- EBVSHRINKVR(%)  9.0906E-01  3.4650E+00
- RELATIVEINF(%)  9.9061E+01  9.6506E+01
- EPSSHRINKSD(%)  3.3600E+00  3.3600E+00
- EPSSHRINKVR(%)  6.6071E+00  6.6071E+00
+ ETASHRINKSD(%)  4.5924E-01  1.5966E+00
+ ETASHRINKVR(%)  9.1636E-01  3.1677E+00
+ EBVSHRINKSD(%)  4.5536E-01  1.7517E+00
+ EBVSHRINKVR(%)  9.0864E-01  3.4727E+00
+ RELATIVEINF(%)  9.9062E+01  9.6498E+01
+ EPSSHRINKSD(%)  3.3962E+00  3.3962E+00
+ EPSSHRINKVR(%)  6.6771E+00  6.6771E+00
 
   
  TOTAL DATA POINTS NORMALLY DISTRIBUTED (N):         2801
  N*LOG(2PI) CONSTANT TO OBJECTIVE FUNCTION:    5147.8936630125763     
- OBJECTIVE FUNCTION VALUE WITHOUT CONSTANT:    11240.626377457771     
- OBJECTIVE FUNCTION VALUE WITH CONSTANT:       16388.520040470346     
+ OBJECTIVE FUNCTION VALUE WITHOUT CONSTANT:    11240.737542944971     
+ OBJECTIVE FUNCTION VALUE WITH CONSTANT:       16388.631205957547     
  REPORTED OBJECTIVE FUNCTION DOES NOT CONTAIN CONSTANT
   
  TOTAL EFFECTIVE ETAS (NIND*NETA):                           150
   
  #TERE:
- Elapsed estimation  time in seconds:   194.53
- Elapsed covariance  time in seconds:    22.04
- Elapsed postprocess time in seconds:     2.93
+ Elapsed estimation  time in seconds:    89.41
+ Elapsed covariance  time in seconds:    12.99
+ Elapsed postprocess time in seconds:     1.91
 1
  
  
@@ -416,7 +409,7 @@ Current Date:        2 JAN 2026
 
 
 
- #OBJV:********************************************         11240.626       *********************************************
+ #OBJV:********************************************         11240.738       *********************************************
 1
  ************************************************************************************************************************
  ********************                                                                                ********************
@@ -472,7 +465,7 @@ Current Date:        2 JAN 2026
 +        7.64E-01
  
  ETA2
-+        0.00E+00  4.40E-01
++        0.00E+00  4.39E-01
  
 
 
@@ -502,7 +495,7 @@ Current Date:        2 JAN 2026
 
          TH 1      TH 2     
  
-         2.84E-01  4.91E-01
+         2.84E-01  4.82E-01
  
 
 
@@ -515,7 +508,7 @@ Current Date:        2 JAN 2026
 +        1.89E-01
  
  ETA2
-+       .........  4.40E-02
++       .........  4.37E-02
  
 
 
@@ -539,10 +532,10 @@ Current Date:        2 JAN 2026
          ETA1      ETA2     
  
  ETA1
-+        1.23E-01
++        1.24E-01
  
  ETA2
-+       .........  5.00E-02
++       .........  4.98E-02
  
 
 
@@ -552,7 +545,7 @@ Current Date:        2 JAN 2026
          EPS1      EPS2     
  
  EPS1
-+        1.46E-02
++        1.45E-02
  
  EPS2
 +       ......... .........
@@ -569,22 +562,22 @@ Current Date:        2 JAN 2026
             TH 1      TH 2      OM11      OM12      OM22      SG11      SG12      SG22  
  
  TH 1
-+        8.08E-02
++        8.04E-02
  
  TH 2
-+       -1.17E-01  2.41E-01
++       -1.14E-01  2.32E-01
  
  OM11
-+        3.33E-02 -4.13E-02  3.55E-02
++        3.37E-02 -4.05E-02  3.58E-02
  
  OM12
 +       ......... ......... ......... .........
  
  OM22
-+       -1.08E-03  1.61E-03 -3.06E-03 .........  1.93E-03
++       -1.43E-03  2.02E-03 -3.18E-03 .........  1.91E-03
  
  SG11
-+       -3.17E-03  5.06E-03 -1.89E-03 .........  4.14E-05  2.51E-04
++       -3.13E-03  4.90E-03 -1.89E-03 .........  5.28E-05  2.49E-04
  
  SG12
 +       ......... ......... ......... ......... ......... ......... .........
@@ -607,19 +600,19 @@ Current Date:        2 JAN 2026
 +        2.84E-01
  
  TH 2
-+       -8.40E-01  4.91E-01
++       -8.35E-01  4.82E-01
  
  OM11
-+        6.22E-01 -4.47E-01  1.89E-01
++        6.27E-01 -4.44E-01  1.89E-01
  
  OM12
 +       ......... ......... ......... .........
  
  OM22
-+       -8.62E-02  7.45E-02 -3.69E-01 .........  4.40E-02
++       -1.15E-01  9.58E-02 -3.84E-01 .........  4.37E-02
  
  SG11
-+       -7.03E-01  6.50E-01 -6.33E-01 .........  5.94E-02  1.58E-02
++       -7.01E-01  6.45E-01 -6.33E-01 .........  7.66E-02  1.58E-02
  
  SG12
 +       ......... ......... ......... ......... ......... ......... .........
@@ -639,22 +632,22 @@ Current Date:        2 JAN 2026
             TH 1      TH 2      OM11      OM12      OM22      SG11      SG12      SG22  
  
  TH 1
-+        5.98E+01
++        5.91E+01
  
  TH 2
-+        2.25E+01  1.57E+01
++        2.24E+01  1.59E+01
  
  OM11
-+       -2.71E+01 -9.33E+00  7.00E+01
++       -2.73E+01 -9.55E+00  7.02E+01
  
  OM12
 +       ......... ......... ......... .........
  
  OM22
-+       -3.05E+01 -1.31E+01  9.59E+01 .........  6.52E+02
++       -2.77E+01 -1.31E+01  9.66E+01 .........  6.63E+02
  
  SG11
-+        1.01E+02 -1.00E+02  3.57E+02 .........  4.94E+02  9.89E+03
++        1.03E+02 -1.00E+02  3.57E+02 .........  5.03E+02  9.90E+03
  
  SG12
 +       ......... ......... ......... ......... ......... ......... .........
@@ -693,9 +686,9 @@ Current Date:        2 JAN 2026
 
              1         2         3         4         5
  
-         1.23E-01  2.86E-01  5.02E-01  1.09E+00  3.00E+00
+         1.25E-01  2.87E-01  5.06E-01  1.08E+00  3.01E+00
  
- Elapsed finaloutput time in seconds:     0.34
- #CPUT: Total CPU Time in Seconds,      222.050
+ Elapsed finaloutput time in seconds:     0.42
+ #CPUT: Total CPU Time in Seconds,      106.214
 Stop Time:
-vr 02 jan 2026 20:44:45 CET
+ma 05 jan 2026 13:50:46 CET
