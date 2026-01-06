@@ -44,8 +44,8 @@ $THETA   ; values are determined in 3 iterations
 (0.001,  5.48,      15) ; V (L) [2,3]
 (-1,     3.78,       9) ; CLADA
 (-1,    -0.276,      5) ; VADA
-(-0.134,  -0.126,  0.084) ; VALB
-(-0.055,  -0.0543, 0.042) ; VBW
+(-0.138,  -0.126,  0.084) ; VALB
+(-0.056,  -0.0543, 0.042) ; VBW
 (-1.250, 0.227,  1.190) ; VCREAT
 
 $DES DADT(1) = -K10*A(1)  ; ODE for central compartment
