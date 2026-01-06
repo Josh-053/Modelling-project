@@ -1,0 +1,6 @@
+find references to justify this statement below:
+
+Vd reduces as ALB increases upon inflammation, as ALB causes more binding to drug preventing it from distribution (and conc of mAb becomes lower as V increases).
+CL in mAbs take already long due to size + due to binding to ALB caused by inflammation, mAb in blood is sustained for longer time.
+
+-> to expect: negative correlation btwn V and ALB

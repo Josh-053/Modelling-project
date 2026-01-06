@@ -73,7 +73,7 @@ Y = IPRED * (1 + EPS(1)) + EPS(2)
 
 $OMEGA
 0.573 ; IIV CL
-0.214 ; IIV V
+0.214 ; IIV V1
 
 $SIGMA    ; residual variability
 0.29     ; EPS(1), proportional

@@ -1,0 +1,90 @@
+Time-varying ALB on CL (ETA1) has median  31.88 and mean  31.70
+Time-varying BW on V1 (ETA2) has median  65.93 and mean  65.62
+Time-varying ALB on V1 (ETA2) has median  31.85 and mean  31.64
+Time-varying CREAT on V1 (ETA2) has median   1.03 and mean   1.02
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run02_filtered/rundir/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF    SIGNIFICANT PVAL
+CLAGE-3          PVAL  10690.64889  10689.14788              1.50101  >   3.84150    1              0.220520 
+CLALB-5          PVAL  10690.64889  10722.08562            -31.43673  >  -3.84150   -1              2.06e-08 
+V1ALB-5          PVAL  10690.64889  10741.42777            -50.77888  >  -3.84150   -1              1.03e-12 
+V1BW-5           PVAL  10690.64889  10720.71629            -30.06740  >  -3.84150   -1              4.17e-08 
+V1CREAT-3        PVAL  10690.64889  10688.41407              2.23482  >   3.84150    1              0.134930 
+
+--------------------
+
+
+Scope reduction requested in adaptive scope reduction scm after forward step 1 but
+no relation was chosen for inclusion by scm in this step:
+scmplus forward search is done.
+Starting scmplus backward search
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run02_filtered/rundir/backward_scm_dir2/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF  INSIGNIFICANT PVAL
+CLADA-1          PVAL  10690.64889  10757.91286            -67.26397  >  -6.63490   -1              2.37e-16 
+CLAGE-1          PVAL  10690.64889  10695.89702             -5.24812  >  -6.63490   -1        YES!  0.021970 
+CLALB-2          PVAL  10690.64889  10721.09397            -30.44508  >  -6.63490   -1              3.43e-08 
+V1ADA-1          PVAL  10690.64889  10697.09244             -6.44355  >  -6.63490   -1        YES!  0.011136 
+V1ALB-2          PVAL  10690.64889  10699.30855             -8.65966  >  -6.63490   -1              0.003253 
+V1BW-2           PVAL  10690.64889  10712.89598            -22.24709  >  -6.63490   -1              0.000002 
+V1CREAT-1        PVAL  10690.64889  10697.19132             -6.54243  >  -6.63490   -1        YES!  0.010533 
+
+Parameter-covariate relation chosen in this backward step: CL-AGE-1
+CRITERION              PVAL > 0.01
+BASE_MODEL_OFV       10690.64889
+CHOSEN_MODEL_OFV     10695.89702
+Relations included after this step:
+CL      ADA-2            ALB-3            
+V1      ADA-2            ALB-3            BW-3             CREAT-2          
+--------------------
+
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run02_filtered/rundir/backward_scm_dir2/scm_dir1/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF  INSIGNIFICANT PVAL
+CLADA-1          PVAL  10695.89702  10764.63314            -68.73613  >  -6.63490   -1              1.13e-16 
+CLALB-2          PVAL  10695.89702  10727.04474            -31.14773  >  -6.63490   -1              2.39e-08 
+V1ADA-1          PVAL  10695.89702  10702.76479             -6.86778  >  -6.63490   -1              0.008776 
+V1ALB-2          PVAL  10695.89702  10702.28391             -6.38690  >  -6.63490   -1        YES!  0.011497 
+V1BW-2           PVAL  10695.89702  10718.00101            -22.10399  >  -6.63490   -1              0.000003 
+V1CREAT-1        PVAL  10695.89702  10702.22985             -6.33283  >  -6.63490   -1        YES!  0.011852 
+
+Parameter-covariate relation chosen in this backward step: V1-CREAT-1
+CRITERION              PVAL > 0.01
+BASE_MODEL_OFV       10695.89702
+CHOSEN_MODEL_OFV     10702.22985
+Relations included after this step:
+CL      ADA-2            ALB-3            
+V1      ADA-2            ALB-3            BW-3             
+--------------------
+
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run02_filtered/rundir/backward_scm_dir2/scm_dir1/scm_dir1/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF  INSIGNIFICANT PVAL
+CLADA-1          PVAL  10702.22985  10771.39513            -69.16528  >  -6.63490   -1              9.05e-17 
+CLALB-2          PVAL  10702.22985  10735.09931            -32.86946  >  -6.63490   -1              9.86e-09 
+V1ADA-1          PVAL  10702.22985  10707.64476             -5.41491  >  -6.63490   -1        YES!  0.019965 
+V1ALB-2          PVAL  10702.22985  10707.98382             -5.75397  >  -6.63490   -1        YES!  0.016451 
+V1BW-2           PVAL  10702.22985  10723.85026            -21.62042  >  -6.63490   -1              0.000003 
+
+Parameter-covariate relation chosen in this backward step: V1-ADA-1
+CRITERION              PVAL > 0.01
+BASE_MODEL_OFV       10702.22985
+CHOSEN_MODEL_OFV     10707.64476
+Relations included after this step:
+CL      ADA-2            ALB-3            
+V1      ALB-3            BW-3             
+--------------------
+
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run02_filtered/rundir/backward_scm_dir2/scm_dir1/scm_dir1/scm_dir1/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF  INSIGNIFICANT PVAL
+CLADA-1          PVAL  10707.64476  11019.17526           -311.53051  >  -6.63490   -1              1.01e-69 
+CLALB-2          PVAL  10707.64476  10740.76104            -33.11629  >  -6.63490   -1              8.68e-09 
+V1ALB-2          PVAL  10707.64476  10714.86994             -7.22519  >  -6.63490   -1              0.007189 
+V1BW-2           PVAL  10707.64476  10728.64085            -20.99609  >  -6.63490   -1              0.000005 
+
+--------------------
+
+
+scmplus backward search is done.
+

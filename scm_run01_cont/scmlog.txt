@@ -1,0 +1,88 @@
+Time-varying BW on V (ETA2) has median  65.93 and mean  65.62
+Time-varying ALB on V (ETA2) has median  31.85 and mean  31.64
+Time-varying CREAT on V (ETA2) has median   1.03 and mean   1.02
+Time-varying BW on CL (ETA1) has median  65.80 and mean  65.66
+Time-varying ALB on CL (ETA1) has median  31.89 and mean  31.70
+Time-varying CREAT on CL (ETA1) has median   1.04 and mean   1.02
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run01_cont/rundir/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF    SIGNIFICANT PVAL
+CLALB-2          PVAL  10766.31913  10762.93850              3.38063  >   3.84150    1              0.065967 
+CLBW-2           PVAL  10766.31913  10765.96015              0.35898  >   3.84150    1              0.549070 
+CLCREAT-2        PVAL  10766.31913  10766.33359             -0.01446  >   3.84150    1                   9999
+CLSEX-2          PVAL  10766.31913  10766.30483              0.01430  >   3.84150    1              0.904820 
+VADA-2           PVAL  10766.31913  10758.02107              8.29806  >   3.84150    1        YES!  0.003969 
+VBW-3            PVAL  10766.31913  10746.29310             20.02603  >   3.84150    1        YES!  0.000008 
+VCREAT-2         PVAL  10766.31913  10759.15782              7.16131  >   3.84150    1        YES!  0.007449 
+
+Parameter-covariate relation chosen in this forward step: V-BW-3
+CRITERION              PVAL < 0.05
+BASE_MODEL_OFV       10766.31913
+CHOSEN_MODEL_OFV     10746.29310
+Relations included after this step:
+CL      ADA-2            
+V       ALB-3            BW-3             
+--------------------
+
+
+Taking a step forward in adaptive scope reduction scm after reducing scope with 3 relations : CL-ALB,CL-BW,CL-SEX
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run01_cont/rundir/reduced_forward_scm_dir2/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF    SIGNIFICANT PVAL
+CLCREAT-2        PVAL  10746.29310  10744.70346              1.58965  >   3.84150    1              0.207380 
+VADA-2           PVAL  10746.29310  10738.85670              7.43640  >   3.84150    1        YES!  0.006392 
+VCREAT-2         PVAL  10746.29310  10739.68302              6.61008  >   3.84150    1        YES!  0.010140 
+
+Parameter-covariate relation chosen in this forward step: V-ADA-2
+CRITERION              PVAL < 0.05
+BASE_MODEL_OFV       10746.29310
+CHOSEN_MODEL_OFV     10738.85670
+Relations included after this step:
+CL      ADA-2            
+V       ADA-2            ALB-3            BW-3             
+--------------------
+
+
+Taking a step forward in adaptive scope reduction scm after reducing scope with 1 relations : CL-CREAT
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run01_cont/rundir/reduced_forward_scm_dir3/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF    SIGNIFICANT PVAL
+VCREAT-2         PVAL  10738.85670  10731.81584              7.04086  >   3.84150    1        YES!  0.007967 
+
+Parameter-covariate relation chosen in this forward step: V-CREAT-2
+CRITERION              PVAL < 0.05
+BASE_MODEL_OFV       10738.85670
+CHOSEN_MODEL_OFV     10731.81584
+Relations included after this step:
+CL      ADA-2            
+V       ADA-2            ALB-3            BW-3             CREAT-2          
+--------------------
+
+
+Taking a step forward in adaptive scope reduction scm after reducing scope with 0 relations : 
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run01_cont/rundir/reduced_forward_scm_dir4/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF    SIGNIFICANT PVAL
+VCREAT-3         PVAL  10731.81584  10731.74625              0.06959  >   3.84150    1              0.791930 
+
+--------------------
+
+
+Scope reduction requested in adaptive scope reduction scm after forward step 4 but
+no relation was chosen for inclusion by scm in this step:
+scmplus forward search is done.
+Starting scmplus backward search
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run01_cont/rundir/backward_scm_dir5/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF  INSIGNIFICANT PVAL
+CLADA-1          PVAL  10731.81584  10795.88168            -64.06583  >  -6.63490   -1              1.20e-15 
+VADA-1           PVAL  10731.81584  10739.79851             -7.98266  >  -6.63490   -1              0.004723 
+VALB-2           PVAL  10731.81584     FAILED                 FAILED  >  -6.63490   -1                    999
+VBW-2            PVAL  10731.81584  10755.91197            -24.09613  >  -6.63490   -1              0.000001 
+VCREAT-1         PVAL  10731.81584  10738.65018             -6.83433  >  -6.63490   -1              0.008942 
+
+--------------------
+
+
+scmplus backward search is done.
+

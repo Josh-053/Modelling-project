@@ -5,4 +5,6 @@ outputplot%3ACONC_M7%3A0\obsMean=true
 outputplot%3ACONC_M7%3A0\yLog=true
 
 [SETTINGS]
+outputplot%3ACONC_M7%3A0\fixedNbBins=14
+outputplot%3ACONC_M7%3A0\isNumberOfBinsFixed=true
 outputplot%3ACONC_M7%3A0\timeAfterLastDose=true

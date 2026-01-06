@@ -1,0 +1,79 @@
+Time-varying BW on V1 (ETA1) has median  65.97 and mean  65.59
+Time-varying ALB on V1 (ETA1) has median  31.88 and mean  31.60
+Time-varying CREAT on V1 (ETA1) has median   1.05 and mean   1.02
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run07/rundir/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF    SIGNIFICANT PVAL
+V1ADA-2          PVAL  15250.02719  15022.27763            227.74956  >   3.84150    1        YES!  1.85e-51 
+V1AGE-2          PVAL  15250.02719  15249.18000              0.84719  >   3.84150    1              0.357350 
+V1ALB-2          PVAL  15250.02719  15250.08122             -0.05402  >   3.84150    1                   9999
+V1BW-2           PVAL  15250.02719  15245.11228              4.91491  >   3.84150    1        YES!  0.026626 
+V1CREAT-2        PVAL  15250.02719  15250.03020             -0.00300  >   3.84150    1                   9999
+V1SEX-2          PVAL  15250.02719  15249.66950              0.35769  >   3.84150    1              0.549790 
+
+Parameter-covariate relation chosen in this forward step: V1-ADA-2
+CRITERION              PVAL < 0.05
+BASE_MODEL_OFV       15250.02719
+CHOSEN_MODEL_OFV     15022.27763
+Relations included after this step:
+V1      ADA-2            
+--------------------
+
+
+Taking a step forward in adaptive scope reduction scm after reducing scope with 2 relations : V1-AGE,V1-SEX
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run07/rundir/reduced_forward_scm_dir2/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF    SIGNIFICANT PVAL
+V1ALB-2          PVAL  15022.27763  15019.63438              2.64325  >   3.84150    1              0.103990 
+V1BW-2           PVAL  15022.27763  15016.35578              5.92186  >   3.84150    1        YES!  0.014954 
+V1CREAT-2        PVAL  15022.27763  15028.79657             -6.51893  >   3.84150    1                   9999
+
+Parameter-covariate relation chosen in this forward step: V1-BW-2
+CRITERION              PVAL < 0.05
+BASE_MODEL_OFV       15022.27763
+CHOSEN_MODEL_OFV     15016.35578
+Relations included after this step:
+V1      ADA-2            BW-2             
+--------------------
+
+
+Taking a step forward in adaptive scope reduction scm after reducing scope with 1 relations : V1-ALB
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run07/rundir/reduced_forward_scm_dir3/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF    SIGNIFICANT PVAL
+V1BW-3           PVAL  15016.35578  15004.27881             12.07697  >   3.84150    1        YES!  0.000510 
+V1CREAT-2        PVAL  15016.35578  15014.49996              1.85582  >   3.84150    1              0.173110 
+
+Parameter-covariate relation chosen in this forward step: V1-BW-3
+CRITERION              PVAL < 0.05
+BASE_MODEL_OFV       15016.35578
+CHOSEN_MODEL_OFV     15004.27881
+Relations included after this step:
+V1      ADA-2            BW-3             
+--------------------
+
+
+Taking a step forward in adaptive scope reduction scm after reducing scope with 1 relations : V1-CREAT
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run07/rundir/reduced_forward_scm_dir4/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF    SIGNIFICANT PVAL
+V1BW-5           PVAL  15004.27881  15008.87317             -4.59436  >  -3.84150   -1              0.032077 
+
+--------------------
+
+
+Scope reduction requested in adaptive scope reduction scm after forward step 4 but
+no relation was chosen for inclusion by scm in this step:
+scmplus forward search is done.
+Starting scmplus backward search
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run07/rundir/backward_scm_dir5/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF  INSIGNIFICANT PVAL
+V1ADA-1          PVAL  15004.27881  15206.79480           -202.51599  >  -6.63490   -1              5.90e-46 
+V1BW-2           PVAL  15004.27881  15013.37725             -9.09844  >  -6.63490   -1              0.002558 
+
+--------------------
+
+
+scmplus backward search is done.
+

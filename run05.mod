@@ -21,10 +21,13 @@ NCOMP = 1                       ; number of compartments
 COMP  = (DOSE, DEFDOSE, DEFOBS) ; first (central) compartment
 
 $PK
+IF (EVID.EQ.1) LASTDOSE = TIME
+TAD = TIME - LASTDOSE
+
 ; Typical (population) parameters
-TVCL   = THETA(1)   ; Linear clearance [L/h]
+TVCL   = THETA(1)   ; Linear clearance [L/d]
 TVV    = THETA(2)   ; Central volume [L]
-TVVMAX = THETA(3)   ; Vmax for MM elimination [amount/h]
+TVVMAX = THETA(3)   ; Vmax for MM elimination [amount/d]
 TVKM   = THETA(4)   ; Km for MM elimination [conc units, e.g., mg/L]
 
 ; Individual parameters
@@ -39,18 +42,10 @@ K  = CL/V
 S1 = V
 
 $THETA; values were iteratively determined
-(0.1, 1.19, 6)   ; [1] TVCL (L/h)
-(1.0, 4.45, 10) ; [2] TVV  (L)
-(0.01, 0.977, 6)  ; [3] VMAX (mg/h) 
-(0.1, 3.65, 10)  ; [4] KM   (mg/L)
-
-$OMEGA; values were iteratively determined
-0.615 ; IIV CL
-0.217 ; IIV V
-
-$SIGMA  ; residual variability
-0.123   ; proportional error
-0.0000028 ; additional error
+(0, 1.19, 20)   ; [1] TVCL (L/d)
+(0, 4.45, 10)  ; [2] TVV  (L)
+(0.00001, 0.977,20) ; [3] VMAX (mg/d) 
+(0.00001, 3.65, 10)  ; [3] KM   (mg/L)
 
 $DES ; ODE for 1CMT with combined elimination
 DADT(1) = - (VMAX*A(1)) / (KM*V + A(1)) - K*A(1)
@@ -75,12 +70,20 @@ IRES=DV-IPRED
 IWRES=IRES/W
 Y = IPRED * (1 + EPS(1)) + EPS(2)
 
+$OMEGA; values were iteratively determined
+0.615 ; IIV CL
+0.217 ; IIV V
+
+$SIGMA    ; residual variability
+0.123     ; proportional error
+5E-13 FIX ; additive error
+
 $EST
 METHOD=1 INTERACTION; FOCE-I
 MAXEVAL=9999
 SIG=3
+SIGL=3
 PRINT=5
-
 
 $COVARIANCE PRINT=E UNCONDITIONAL MATRIX=S
 
@@ -96,8 +99,11 @@ ID ADA SEX COL NOPRINT NOAPPEND ONEHEADER FILE=run05_catab
 $TABLE ; output table for continuous covariates
 ID BW ALB AGE CREAT NOPRINT NOAPPEND ONEHEADER FILE=run05_cotab
 
+$TABLE ; output table for parameters and covariates
+ID CL V K ADA SEX COL BW ALB AGE CREAT NOPRINT NOAPPEND ONEHEADER FILE=run05_pa_cov
+
 ;; REFERENCES
 ;; 1) https://www.ncbi.nlm.nih.gov/books/NBK557889/
 ;; 2) https://pmc.ncbi.nlm.nih.gov/articles/PMC8301575/
-;; 3)https://ascpt.onlinelibrary.wiley.com/doi/abs/10.1016/j.clpt.2004.12.212
+;; 3) https://www.tandfonline.com/doi/pdf/10.1080/19420862.2025.2512217?needAccess=true
 
