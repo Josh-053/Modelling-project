@@ -42,8 +42,8 @@ K  = CL/V
 S1 = V
 
 $THETA; values were iteratively determined
-(0, 1.19, 20)   ; [1] TVCL (L/d)
-(0, 4.45, 10)  ; [2] TVV  (L)
+(0.00001, 1.19, 20)   ; [1] TVCL (L/d)
+(0.00001, 4.45, 10)  ; [2] TVV  (L)
 (0.00001, 0.977,20) ; [3] VMAX (mg/d) 
 (0.00001, 3.65, 10)  ; [3] KM   (mg/L)
 

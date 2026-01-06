@@ -1,1 +1,0 @@
-/usr/local/bin/bootstrap -samples=1000 -threads=8 -dir=bootstrap -nozip final_backward_3.mod
