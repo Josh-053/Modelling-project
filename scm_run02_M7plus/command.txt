@@ -1,1 +1,0 @@
-/usr/local/bin/scmplus run02.scm -threads=8 -dir=scm_run02_M7plus -ignore_no_sigl -maxevals=9999

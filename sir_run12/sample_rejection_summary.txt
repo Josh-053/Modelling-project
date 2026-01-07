@@ -1,0 +1,12 @@
+Sample rejection summary:
+BoxCox LowerBound UpperBound Zero  Label
+     0          0         0     0  [1]   CL (L/d)
+     0          0         0     0  [2,3] V1  (L)
+     0          0         0     0  V2
+     0          0         0     0  Q
+     0          0         0     0  CLADA
+     0          0         0     0  V1ALB1
+     0          0         0     0  IIV CL
+     0          0         0     0  IIV V1
+     0          0         0     0  EPS(1), proportional
+OMEGA/SIGMA blocks nonposdef rejections: 0

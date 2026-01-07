@@ -1,5 +1,5 @@
 ;; 1. Based on: run02
-;; 2. Description: PMX001 2CMT LINEAR M7+ (BASE MODEL)
+;; 2. Description: PMX001 2CMT LINEAR M7+
 ;; Joshua I., Ali K.
 ;; 2025-12-09
 
@@ -30,10 +30,10 @@ TVV1 = THETA(2)
 TVV2 = THETA(3)
  TVQ = THETA(4)
    
-  CL = TVCL
-  V1 = TVV1 * EXP(ETA(1))
+  CL = TVCL * EXP(ETA(1))
+  V1 = TVV1 * EXP(ETA(2))
   V2 = TVV2
-   Q = TVQ
+   Q = TVQ  * EXP(ETA(3))
  
  K10 = CL/V1
  K12 = Q/V1
@@ -43,10 +43,10 @@ TVV2 = THETA(3)
   S2 = V2/1
 
 $THETA ; values are determined in 3 iterations
-(0.001, 0.941, 10)     ; [1]   CL (L/d)
-(0.001, 2.19, 10)    ; [2,3] V1  (L)
-(0.01,  0.0396, 10)    ; V2
-(0.001, 1.98, 10)    ; Q
+(0.001, 1.48, 8)     ; [1]   CL (L/d)
+(0.001, 4.61, 10)    ; [2,3] V1  (L)
+(0.01,  0.349, 6)    ; V2
+(0.001, 2.71, 6)    ; Q
 
 $DES DADT(1) = -K10*A(1) -K12*A(1) +K21*A(2) ; ODE for central    compartment
      DADT(2) =            K12*A(1) -K21*A(2) ; ODE for peripheral compartment
@@ -72,11 +72,12 @@ IWRES=IRES/W
 Y = IPRED * (1 + EPS(1)) + EPS(2)
 
 $OMEGA
-;0.573 ; IIV CL
-0.438 ; IIV V1
+0.573 ; IIV CL
+0.214 ; IIV V1
+0.2
 
 $SIGMA    ; residual variability
-1.32     ; EPS(1), proportional
+0.29     ; EPS(1), proportional
 5E-13 FIX ; EPS(2); additive, required by M7+ censoring method
 
 $EST

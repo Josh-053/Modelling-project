@@ -1,5 +1,5 @@
 ;; 1. Based on: run01
-;; 2. Description: PMX001 2CMT LINEAR M7+ (BASE MODEL)
+;; 2. Description: PMX001 2CMT LINEAR M7+
 ;; Joshua I., Ali K.
 ;; 2025-12-09
 

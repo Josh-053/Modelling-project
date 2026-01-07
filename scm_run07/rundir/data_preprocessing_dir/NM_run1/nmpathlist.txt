@@ -1,3 +1,0 @@
-The pathlist /usr/bin obtained from file /home/ali/nm760/nmloc is placed at the head of PATH
-The gfortran compiler at one of those locations will be used if it exists.
-If this is not what you want, then modify the file /home/ali/nm760/nmloc accordingly.

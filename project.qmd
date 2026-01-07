@@ -3,24 +3,30 @@ title: "Population Pharmacokinetics and Exposure–Response Analysis of PMX001 i
 author: "Joshua Ijidakinro, Ali Kazim"
 affiliation: "Faculty of Pharmaceutical Science, KU Leuven"
 date: today
-format: pdf
+format:
+  pdf:
+    papersize: A4
+toc: true
+number-sections: true
 execute:
   echo: true
   warning: false
   message: false
 ---
 
-# Introduction
+{{< pagebreak >}} 
+
+## Introduction
 
 Acute severe ulcerative colitis (ASUC) affects a quarter of patients with ulcerative colitis, either at initial presentation or later in the course of the disease. Acute severe ulcerative colitis represents a medical emergency, with 36% of patients experiencing multiple episodes during their lifetimes, and about 40% requiring colectomy, along with significant morbidity. Corticosteroids are the primary treatment for acute severe ulcerative colitis, yet one in three patients fails to respond. Infliximab and ciclosporin emerged as the second-line rescue treatment options after corticosteroid failure, but with colectomy rates plateauing at about 10%, there is an unmet medical need. 
 
-# Objectives
+## Objectives
 
 The primary aim of this study was to characterize the population pharmacokinetics (popPK) of PMX001 in adult patients with acute severe ulcerative colitis. In addition, the analysis sought to identify and quantify the influence of key clinical and demographic covariates on PMX001 exposure. Finally, the study explored the relationship between PMX001 exposure metrics and colectomy-free survival, with the goal of understanding how drug exposure may impact clinical outcomes in this critically ill patient population. 
 
-# Methods
+## Methods
 
-## Data Preparation
+### Data Preparation
 
 ```{r}
 #| include: false
@@ -32,66 +38,309 @@ library(patchwork)
 ```
 
 ```{r}
-data <- read.table("dataset.txt", 
-                  sep = " ",        # space-separated
-                  na.strings = ".", # treat "." as NA
-                  header = TRUE)
+#| include: false
+data <- read.table("dataset.txt", sep = " ",       # space-separated
+                  header = TRUE, na.strings = ".") # treat "." as NA
 
-LLOQ <- 1                           # mg/L
+LLOQ <- 1 # mg/L
 
-data <- data %>%
-  mutate(DOSE = as.numeric(DOSE),
-         EVID = case_when(
-           is.na(CONC) & DOSE!=0 ~ 1,
-           CONC>=0 ~ 0,
-           is.na(CONC) & is.na(DOSE) ~ 2),
-         BLQ = case_when(
-           CONC<1 ~ 1,
-           CONC>=1 ~ 0,
-           is.na(CONC) ~ 0),
-         CONC_M7 = ifelse(CONC < 1, 0, CONC))
-         
-data <- data %>% group_by(ID) %>%  
-  fill(c(BW),.direction = "downup") %>%
-  fill(c(ALB),.direction = "downup") %>%
-  fill(c(CREAT),.direction = "downup") %>%
-  ungroup()
-
-
-data <- data %>%
-  group_by(ID) %>%
+data <- data %>% mutate(DOSE = as.numeric(DOSE),
+                        EVID = case_when(is.na(CONC) & DOSE!=0 ~ 1,
+                                         CONC>=0 ~ 0,
+                                         is.na(CONC) & is.na(DOSE) ~ 2),
+                        BLQ = case_when(CONC<1 ~ 1,
+                                        CONC>=1 ~ 0,
+                                        is.na(CONC) ~ 0),
+                        CONC_M7 = ifelse(CONC < 1, 0, CONC)) %>%
+  group_by(ID) %>%  
+  fill(c(ALB, BW, CREAT),.direction = "downup") %>%
   arrange(TIME, .by_group = TRUE) %>%
   mutate(ADA = case_when(
     ID %in% 71:75 ~ as.integer(cumany(ADA == 1)),
     TRUE          ~ ADA)) %>%
   ungroup()
 
-
 data$DOSE = data$DOSE * data$BW # dose (mg) = dose (mg/kg) * body weight (kg)
 
-# write.table(data, file = "dataset_clean.txt", quote = FALSE, sep = " ", na = ".")
-write.csv(data, file = "dataset_clean.csv", quote = FALSE, na = ".", row.names = FALSE)
+write.csv(data, file = "dataset_clean.csv", quote = FALSE,
+          na = ".", row.names = FALSE)
 ```
 
-Data from a Phase 1/2 study of the investigational medicinal product PMX001 was collected for **`r length(unique(data$ID))` adult patients** with acute severe ulcerative colitis over the course of **`r length(unique(data$WEEK))` weeks**. In this study, patients received four times one dose of 3, 6 or 9 mg/kg per two weeks. This data was processed in R (version 4.5.2). Plasma concentrations (in mg/L) were measured using enzyme-linked immuno-sorbent assay (ELISA), which had a lower limit of quantification of 1.0 mg/L. 
+Data from a Phase 1/2 study of the investigational medicinal product PMX001 was collected for **`r length(unique(data$ID))` adult patients** with acute severe ulcerative colitis over the course of 17 weeks. In this study, patients received four times one dose of 3, 6 or 9 mg/kg per two weeks. This data was processed in R (version 4.5.2). Plasma concentrations (in mg/L) were measured using enzyme-linked immuno-sorbent assay (ELISA), which had a lower limit of quantification (LLOQ) of 1.0 mg/L.
 
-Below-limit-of-quantification (BLQ) observations were handled using the M7+ method during the model development. The M3 method was investigated for the final PopPK model. Parameter estimates for the model development followed an iterative approach comprising at least three iterations. This approach was executed for both the base and the covariate model development.
+Below-limit-of-quantification (BLQ) observations were handled using the M7+ method during the model development. M7+ method is a censoring method that replaces all BLQ values with **zero**, and adds the LLOQ to the additive error. Missing covariate data were filled using simple imputation with the function `fill(c(covariate),.direction = "downup")` from `tidyverse` package. Parameter estimates for the model development followed an iterative approach comprising at least three iterations, until the difference between estimates no longer surpassed one percent. This approach was executed for both the base and the covariate model development. 
+
+### Model Development and Validation
 
 Population pharmacokinetic (PopPK) modeling was conducted using NONMEM, with model execution and workflow management supported by Pirana and Perl-speaks-NONMEM (PsN). Based on the censored dataset, a two-compartment base model with linear elimination was constructed. 
 
-Covariate selection was performed using the enhanced stepswise covariate model (in short, SCM+) algorithm integrated in PsN. The covariates in the dataset were as follows: antidrug antibody (= immunogenicity, `ADA`), age, serum albumin concentration (`ALB`), body weight (`BW`), serum creatinine concentration (`CREAT`), and sex. Covariates that were significantly correlated with the PK parameters, were assessed for clinical relevance using a forest plot, generated from the R package `PMXForest`. Model robustness and parameter precision were assessed through nonparametric bootstrap analysis with 2000 replicates; in cases of computational limitations, 1000 replicates were used, which provide comparable precision. Predictive performance was evaluated using visual predictive checks (VPC) based on 1000 simulated datasets. 
+Covariate selection was performed using the enhanced stepswise covariate model (in short, SCM+) algorithm integrated in PsN. The covariates in the dataset were as follows: antidrug antibody (= immunogenicity, `ADA`), age, serum albumin concentration (`ALB`), body weight (`BW`), serum creatinine concentration (`CREAT`), and sex. Covariates that were significantly correlated with the PK parameters, were assessed for clinical relevance using a forest plot, generated from the R package `PMXForest`. From there, the final model was generated (see Appendix A1). Model robustness and parameter precision were assessed through sampling importance resampling (SIR); in cases of computational limitations, 1000 replicates were used, which provide comparable precision. Predictive performance was evaluated using visual predictive checks (VPC) based on 1000 simulated datasets.
 
-## Running Code
+### Exposure-Response Analysis
 
+After establishing and validating the popPK model, an exposure-response model was set up for colectomy at week 12. A quantile-quantile (QQ) plot for area under the curve from zero to last point (AUC~0-tlast~) and colectomy was generated using `ggplot2` package.
+
+```{r spearman correlation matrix all R}
+datacor <- data %>%
+     select(ADA, AGE, ALB, BW, CREAT, COL, SEX)
+rcorr(as.matrix(datacor), type = "spearman")$r %>%
+  signif(digits = 3)
+```
+
+```{r spearman correlation matrix all p}
+rcorr(as.matrix(datacor), type = "spearman")$P %>%
+  signif(digits = 3)
+```
+
+```{r dataset general info}
+length(unique(data$ID))
+```
+
+{{< pagebreak >}} 
+
+## Results
+
+### Covariate Relevance: Forest Plot
+
+This section adds a forest plot to assess the relevance of key covariates (CREAT, SEX, ALB, BW, ADA, AGE) on exposure in the cleaned dataset.
+
+```{r}
+library(PMXForest)
+library(ggplot2)
+
+theme_set(theme_bw())
+
+ALB_REF_V1 <- 31.84
+
+cs <- PMXForest::getCovStats(
+  data,
+  covariates = "ALB",
+  minLevels  = 10,
+  probs      = c(0.05, 0.95),
+  idVar      = "ID",
+  missVal    = -99,
+  nsig       = 3
+)
+
+dfCovs <- PMXForest::createInputForestData(list(
+  ADA = c(0, 1),
+  ALB = c(cs$ALB["5%"], cs$ALB["95%"])
+))
+
+covnames <- c(
+  "ADA negative","ADA positive",
+  "ALB 27 g/L","ALB 35 g/L"
+)
+
+covariateGroupNames <- c("ADA","Albumin")
+
+functionListName <- c("CL","V1")
+
+# ---- Helpers (copy as-is) ----
+.once_log <- local({ .done <- FALSE; function(expr) { if (!.done) { .done <<- TRUE; force(expr) } } })
+.normalize_thetas <- function(thetas) {
+  if (is.data.frame(thetas)) thetas <- unlist(thetas, use.names = TRUE)
+  if (is.matrix(thetas))     thetas <- as.vector(thetas)
+  nm <- names(thetas)
+  if (is.null(nm) || any(is.na(nm)) || all(nm == "")) nm <- paste0("THETA", seq_along(thetas))
+  nm <- toupper(nm); nm <- gsub("\\s+", "", nm); nm <- gsub("[()]", "", nm); nm <- gsub("[^A-Z0-9_]", "", nm)
+  names(thetas) <- nm
+  thetas
+}
+.get_theta <- function(thetas, k) {
+  nm <- names(thetas)
+  candidates <- c(paste0("THETA", k), paste0("THETA(", k, ")"), paste0("THETA.", k), paste0("THETA_", k), paste0("THETA", k, "."))
+  for (c in candidates) { idx <- match(c, nm, nomatch = 0); if (idx > 0) return(unname(thetas[[idx]])) }
+  if (length(thetas) >= k) return(unname(thetas[[k]]))
+  stop(sprintf("Theta %d not found in 'thetas'. Available names: %s", k, paste(nm, collapse = ", ")))
+}
+```
+
+```{r}
+# ---- Your covariate functions (robust) ----
+f_CL <- function(thetas, df, ...) {
+  thetas <- .normalize_thetas(thetas)
+  .once_log(message("f_CL: thetas names = ", paste(names(thetas), collapse = ", ")))
+  ADA <- df[["ADA"]]
+  TH5 <- .get_theta(thetas, 5)
+  CLADA <- if (ADA == 0) 1 else (1 + TH5)
+  CLADA
+}
+
+f_V1 <- function(thetas, df, ...) {
+  thetas <- .normalize_thetas(thetas)
+  .once_log(message("f_V1: thetas names = ", paste(names(thetas), collapse = ", ")))
+  ALB <- df[["ALB"]]
+  TH6 <- .get_theta(thetas, 6)
+  V1ALB <- 1 + TH6 * (ALB - ALB_REF_V1)
+  V1ALB
+}
+
+# ---- Data & parameters ----
+extFile <- "run12.ext"
+covFile <- "run12.cov"
+
+dfSamplesCOV <- getSamples(covFile, extFile, n = 1000)
+
+# Optional but recommended: normalize column names at the source
+nm <- names(dfSamplesCOV)
+nm <- toupper(nm); nm <- gsub("\\s+", "", nm); nm <- gsub("[()]", "", nm); nm <- gsub("[^A-Z0-9_]", "", nm)
+names(dfSamplesCOV) <- nm
+
+
+# ---- Compute ----
+dfresCOV <- getForestDFSCM(
+  dfCovs           = dfCovs,
+  cdfCovsNames     = covnames,
+  functionList     = list(f_CL, f_V1),
+  functionListName = functionListName,
+  noBaseThetas     = 6,
+  dfParameters     = dfSamplesCOV,
+  iMiss            = -99
+)
+```
+
+```{r}
+forestPlot(dfresCOV,parameters= c("CL", "V1"),
+           groupNameLabels    = covariateGroupNames,
+           referenceInfo      = "Reference: (CL) ADA = 0 (negative), ALB = 31.88 g/L; (V1) ALB = 31.85 g/L, BW = 1.03 mg/dL",
+           noVar              = 4,
+           size = theme_get()$text$size * 0.92,
+           tabTextSize = 10)
+ggsave("PMXForestSCMPlus.png", width = 11, height = 7, units = "in")
+```
+
+## Discussion
+
+## Conclusion
+
+## Acknowledgements {.unnumbered}
+
+## References {.unnumbered}
+
+{{< pagebreak >}} 
+
+## Appendix {.unnumbered}
+
+### A1. Final Model {.unnumbered .unlisted}
+```{fortran}
+#| eval: false
+;; 1. Based on: run09
+;; 2. Description: PMX001 2CMT LINEAR M7+
+;; Joshua I., Ali K.
+;; 2026-01-07
+
+$PROBLEM PMX001 Two Compartment Model with Linear Elimination (M7+ Censoring)
+
+$INPUT DUMMY=DROP ID TIME WEEK DOSE=AMT RATE CONC=DROP ADA BW ALB SEX AGE
+CREAT COL EVID BLQ CONC_M7=DV
+
+$DATA dataset_clean.csv IGNORE=@
+
+$ABBR DERIV2=NO
+
+$SUBROUTINES
+ADVAN13 ; general nonlinear model
+TOL=5   ; tolerance for $DES, higher TOL: more accurate, but slower to compute
+
+$MODEL
+NCOMP = 2                       ; number of compartments
+COMP  = (DOSE, DEFDOSE, DEFOBS) ; first  (central)    compartment
+COMP  = (PERIPH)                ; second (peripheral) compartment
+
+$PK
+; time after dose
+IF (EVID.EQ.1) LASTDOSE = TIME
+TAD = TIME - LASTDOSE
+
+; fixed effects
+TVCL = THETA(1)
+TVV1 = THETA(2)
+TVV2 = THETA(3)
+ TVQ = THETA(4)
+
+; covariate effects
+IF (ADA.EQ.0) CLADA = 1               ; most common
+IF (ADA.EQ.1) CLADA = (1 + THETA(5))
+V1ALB = ( 1 + THETA(6)*(ALB - 31.84))
+
+; individual values with random effects (ETAs)
+ CL = TVCL * EXP(ETA(1)) * CLADA
+ V1 = TVV1 * EXP(ETA(2)) * V1ALB
+ V2 = TVV2
+  Q = TVQ
+
+K10 = CL/V1
+K12 = Q/V1
+K21 = Q/V2
+
+; scaling factor: DOSE (mg) and DV (mg/L)
+ S1 = V1/1
+ S2 = V2/1
+
+$THETA ; values are determined in 3 iterations
+(0.001, 1.41,    3)    ; CL (L/d) [1]
+(0.001, 4.73,    7)    ; V1 (L) [2,3]
+(0.01,  0.231, 0.8)    ; V2 (L)
+(0.001, 2.15,    5)    ; Q (L/d)
+(0.001, 5.78,    8)    ; CLADA
+(-0.140,-0.127,-0.001) ; V1ALB
+
+$DES DADT(1) = -K10*A(1) - K12*A(1) + K21*A(2) ; ODE central    compartment
+     DADT(2) =             K12*A(1) - K21*A(2) ; ODE peripheral compartment
+     
+$ERROR
+IPRED = F
+LLOQ = 1 ; (mg/L)
+
+PROP_SD = SIGMA(1)
+ADD_SD  = SIGMA(2)
+
+IF (BLQ.EQ.1) ADD_SD = ADD_SD + LLOQ ; BLQ inflation
+W = SQRT(ADD_SD**2+PROP_SD**2)       ; final residual error
+IF (W.LE.0.000001) W=0.000001        ; protective code
+
+IRES  = DV - IPRED
+IWRES = IRES / W
+Y = IPRED * (1 + EPS(1)) + EPS(2)
+
+$OMEGA
+0.608 ; IIV CL
+0.375 ; IIV V1
+
+$SIGMA    ; residual variability
+0.289     ; EPS(1), proportional
+1E-13 FIX ; EPS(2); additive, required by M7+ censoring method
+
+$EST
+METHOD=1 INTERACTION; FOCE-I
+MAXEVAL=9999
+SIG=3
+PRINT=5
+
+$COVARIANCE PRINT=E UNCONDITIONAL MATRIX=S
+
+$TABLE ; output table for standard outcomes
+ID TIME TAD DV EVID PRED IPRED WRES IWRES RES IRES CWRES CL V1 V2 Q K10 K12 
+K21 ADA SEX COL BW ALB AGE CREAT NOPRINT ONEHEADER FILE=run12_table
+
+;; REFERENCES
+;; 1) https://www.ncbi.nlm.nih.gov/books/NBK557889/
+;; 2) https://pmc.ncbi.nlm.nih.gov/articles/PMC8301575/
+;; 3) https://ascpt.onlinelibrary.wiley.com/doi/abs/10.1016/j.clpt.2004.12.212
+```
+
+{{< pagebreak >}} 
+
+### A2. Exploratory Data Anslysis {.unnumbered .unlisted}
 ```{r conc_time profile}
 data <- data %>%
   arrange(ID, TIME) %>%
   group_by(ID) %>%
   mutate(
-    # take TIME at dose rows, -Inf otherwise, then cummax to remember last dose time
     last_dose_time = cummax(if_else(EVID == 1, TIME, -Inf)),
-    # convert pre-first-dose -Inf to NA
-    last_dose_time = if_else(is.finite(last_dose_time), last_dose_time, NA_real_),
+    last_dose_time = if_else(is.finite(last_dose_time),
+                             last_dose_time, NA_real_),
     TAD = TIME - last_dose_time
   ) %>%
   ungroup()
@@ -132,250 +381,20 @@ h1 + h2 + h3 + h4 + plot_annotation(title = "Histograms of Continuous Covariates
 ```
 
 
-```{r spearman correlation matrix all R}
-datacor <- data %>%
-     select(ADA, AGE, ALB, BW, CREAT, COL, SEX)
-rcorr(as.matrix(datacor), type = "spearman")$r %>%
-  signif(digits = 3)
-```
-
-```{r spearman correlation matrix all p}
-rcorr(as.matrix(datacor), type = "spearman")$P %>%
-  signif(digits = 3)
-```
-
-```{r dataset general info}
-length(unique(data$ID))
-```
-
-{{< pagebreak >}} 
-
-## Model File
-
-```{fortran}
-#| eval: false
-;; 1. Based on: run02
-;; 2. Description: PMX001 2CMT LINEAR M7+ (COV MODEL)
-;; x1. Joshua I., Ali K.
-;; 2025-12-29
-
-$PROBLEM PMX001 Two Compartment
-
-$INPUT DUMMY=DROP ID TIME WEEK DOSE=AMT RATE CONC=DV ADA BW ALB SEX AGE CREAT COL EVID BLQ
-
-$DATA dataset_clean.csv IGNORE=@
-
-$ABBR DERIV2=NO
-
-$SUBROUTINES
-ADVAN13 ; general nonlinear model
-TOL=9   ; tolerance for $DES, higher TOL: more accurate, but slower computation
-        ; TOL=9 -> DES will aim for accuracy of 1E-9 for each integration step
-
-$MODEL
-NCOMP=2                      ; number of compartments
-COMP=(DOSE, DEFDOSE, DEFOBS) ; first (central) compartment
-COMP=(PERIPH)                ; second (peripheral) compartment
-
-$PK
-;; time after last dose
-IF (EVID.EQ.1) LASTDOSE = TIME
-TAD = TIME - LASTDOSE
-
-;; typical values
- TVCL = THETA(1)
- TVV1 = THETA(2)
- TVV2 = THETA(3)
-  TVQ = THETA(4)
-
-;; covariate determined from SCM+ based on base model
-IF(ADA.EQ.0) V1ADA = 1               ; Most common
-IF(ADA.EQ.1) V1ADA = ( 1 + THETA(5))
-V1COV = V1ADA  
-
-;; individual values
-   CL = TVCL * EXP(ETA(1))
-   V1 = TVV1 * EXP(ETA(2)) * V1COV
-   V2 = TVV2
-    Q = TVQ
-
-;; derived parameters
-  K10 = CL/V1
-  K12 = Q/V1
-  K21 = Q/V2
-
-;; scaling factors
-   S1 = V1/1 ; scale prediction based on DOSE (mmol) and CONC (mmol/L)
-   S2 = V2/1
-
-$THETA ; values are determined in 3 iterations
-(0.01,  1.32,   3)   ; CL (L/d) [1]
-(0.01,  4.7,    8)   ; V1 (L) [2,3]
-(0.01,  0.232,  1)   ; V2 (L)
-(0.001, 0.0574, 1.5) ; Q  (L/d)
-(-1,    7.86,   20)  ; V1ADA
-
-$DES DADT(1) = -K10*A(1) -K12*A(1) +K21*A(2) ; ODE for central    compartment
-     DADT(2) =            K12*A(1) -K21*A(2) ; ODE for peripheral compartment
-     
-$ERROR
-IPRED = F
-LLOQ = 1  ; (mg/L)
-
-;; residual error standard deviations
-PROP_SD = SIGMA(1)
-ADD_SD  = SIGMA(2)
-
-;; BLQ inflation for M7+ censoring method
-IF (BLQ.EQ.1) ADD_SD = ADD_SD + LLOQ
-
-;; final residual error
-W = SQRT(ADD_SD**2+PROP_SD**2)
-
-IF (W.LE.0.000001) W=0.000001 ; Protective code
-
-IRES=CONC-IPRED
-IWRES=IRES/W
-Y = IPRED * (1 + EPS(1)) + EPS(2)
-
-$OMEGA ; interindividual variability
-0.539  ; IIV CL
-0.235  ; IIV V
-
-$SIGMA          ; residual variability
-0.131           ; EPS(1), proportional
-0.000000005 FIX ; EPS(2); additive, required by M7+ censoring method
-
-$EST
-METHOD=1 INTERACTION; FOCE-I
-MAXEVAL=9999
-SIG=3
-PRINT=5
-
-$COVARIANCE PRINT=E UNCONDITIONAL MATRIX=S
-
-$TABLE ; output table
-ID TIME TAD DV EVID PRED IPRED WRES IWRES RES IRES CWRES CL V1 V2 Q K10 K12 K21 ADASEX COL BW ALB AGE CREAT NOPRINT ONEHEADER FILE=run06
-
-;; REFERENCES
-;; 1) https://www.ncbi.nlm.nih.gov/books/NBK557889/
-;; 2) https://pmc.ncbi.nlm.nih.gov/articles/PMC8301575/
-;; 3) https://ascpt.onlinelibrary.wiley.com/doi/abs/10.1016/j.clpt.2004.12.212
-```
-
-# Covariate Relevance: Forest Plot
-This section adds a forest plot to assess the relevance of key covariates (CREAT, SEX, ALB, BW, ADA, AGE) on exposure in the cleaned dataset.
-
 ```{r}
-library(PMXForest)
-library(ggplot2)
+data7d <- data %>%
+  mutate(
+    TIME = as.numeric(TIME), # ensure numeric
+    TIME = round(TIME))      # round to nearest integer
 
-theme_set(theme_bw())
-
-ALB_REF_CL <- 31.88
-ALB_REF_V <- 31.85
-
-cs <- PMXForest::getCovStats(
-  data,
-  covariates = c("ALB","BW","CREAT"),
-  minLevels  = 10,
-  probs      = c(0.05, 0.95),
-  idVar      = "ID",
-  missVal    = -99,
-  nsig       = 3
-)
-
-dfCovs <- PMXForest::createInputForestData(list(
-  ADA = c(0, 1),
-  ALB = c(cs$ALB["5%"], cs$ALB["95%"]),
-  CREAT = c(cs$CREAT["5%"],  cs$CREAT["95%"])
-))
-
-covnames <- c(
-  "ADA negative","ADA positive",
-  "ALB 27 g/L","ALB 35 g/L",
-  "CREAT 0.45 L/d", "CREAT 1.54 L/d"
-)
-
-covariateGroupNames <- c("ADA","Albumin","Clearance")
-
-functionListName <- c("CL","V")
-
-# ---- Helpers (copy as-is) ----
-.once_log <- local({ .done <- FALSE; function(expr) { if (!.done) { .done <<- TRUE; force(expr) } } })
-.normalize_thetas <- function(thetas) {
-  if (is.data.frame(thetas)) thetas <- unlist(thetas, use.names = TRUE)
-  if (is.matrix(thetas))     thetas <- as.vector(thetas)
-  nm <- names(thetas)
-  if (is.null(nm) || any(is.na(nm)) || all(nm == "")) nm <- paste0("THETA", seq_along(thetas))
-  nm <- toupper(nm); nm <- gsub("\\s+", "", nm); nm <- gsub("[()]", "", nm); nm <- gsub("[^A-Z0-9_]", "", nm)
-  names(thetas) <- nm
-  thetas
-}
-.get_theta <- function(thetas, k) {
-  nm <- names(thetas)
-  candidates <- c(paste0("THETA", k), paste0("THETA(", k, ")"), paste0("THETA.", k), paste0("THETA_", k), paste0("THETA", k, "."))
-  for (c in candidates) { idx <- match(c, nm, nomatch = 0); if (idx > 0) return(unname(thetas[[idx]])) }
-  if (length(thetas) >= k) return(unname(thetas[[k]]))
-  stop(sprintf("Theta %d not found in 'thetas'. Available names: %s", k, paste(nm, collapse = ", ")))
-}
 ```
 
 ```{r}
-# ---- Your covariate functions (robust) ----
-f_CL <- function(thetas, df, ...) {
-  thetas <- .normalize_thetas(thetas)
-  .once_log(message("f_CL: thetas names = ", paste(names(thetas), collapse = ", ")))
-  ADA <- df[["ADA"]]
-  TH3 <- .get_theta(thetas, 3)
-  CLADA <- if (ADA == 0) 1 else (1 + TH3)
-  CLADA
-}
-
-f_V <- function(thetas, df, ...) {
-  thetas <- .normalize_thetas(thetas)
-  .once_log(message("f_V: thetas names = ", paste(names(thetas), collapse = ", ")))
-  ADA <- df[["ADA"]]; ALB <- df[["ALB"]]; CREAT <- df[["CREAT"]]
-  TH4 <- .get_theta(thetas, 4)
-  TH5 <- .get_theta(thetas, 5)
-  TH6 <- .get_theta(thetas, 6)
-  VADA <- if (ADA == 0) 1 else (1 + TH4)
-  VALB <- 1 + TH5 * (ALB - ALB_REF_V)
-  VCREAT <- (1 + TH6 * (CREAT - 1.03))
-  VADA * VALB * VCREAT
-}
-
-# ---- Data & parameters ----
-extFile <- "final_backward_4.ext"
-covFile <- "final_backward_4.cov"
-
-dfSamplesCOV <- getSamples(covFile, extFile, n = 1000)
-
-# Optional but recommended: normalize column names at the source
-nm <- names(dfSamplesCOV)
-nm <- toupper(nm); nm <- gsub("\\s+", "", nm); nm <- gsub("[()]", "", nm); nm <- gsub("[^A-Z0-9_]", "", nm)
-names(dfSamplesCOV) <- nm
-
-
-# ---- Compute ----
-dfresCOV <- getForestDFSCM(
-  dfCovs           = dfCovs,
-  cdfCovsNames     = covnames,
-  functionList     = list(f_CL, f_V),
-  functionListName = functionListName,
-  noBaseThetas     = 6,
-  dfParameters     = dfSamplesCOV,
-  iMiss            = -99
-)
-```
-
-```{r}
-F1 <- forestPlot(dfresCOV,parameters= c("CL", "V"),
-           groupNameLabels    = covariateGroupNames,
-           referenceInfo      = "Reference: (CL) ADA = 0 (negative), ALB = 31.88 g/L; (V1) ALB = 31.85 g/L, CREAT = 1.03 mg/dL",
-           noVar              = 4,
-           size = theme_get()$text$size * 0.92,
-           tabTextSize = 10)
-ggsave("PMXForestSCMPlus.png", plot = F1, width = 11, height = 7, units = "in")
+ggplot(data7d %>% filter(TIME == 7),
+       aes(x = TIME,
+           y = CONC_M7)) +
+  geom_violin(trim = FALSE) +
+  geom_boxplot(width = 0.1, outlier.shape = 16, outlier.size = 2, outlier.colour = "red") +
+  theme_minimal()
 ```
 

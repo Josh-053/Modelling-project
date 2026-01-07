@@ -1,0 +1,43 @@
+CLADA-2          PVAL  11091.65038  10756.35682            335.29357  >   3.84150    1        YES!  6.76e-75 
+V1ALB-2          PVAL  10756.35682  10634.30579            122.05103  >   3.84150    1        YES!  2.25e-28 
+V1BW-2           PVAL  10634.30579  10605.95936             28.34643  >   3.84150    1        YES!  1.01e-07 
+V1ADA-2          PVAL  10605.95936  10599.06676              6.89259  >   3.84150    1        YES!  0.008655 
+CLAGE-2          PVAL  10599.06676  10594.14491              4.92185  >   3.84150    1        YES!  0.026519 
+Relations included after final step:
+CL      ADA-2            AGE-2            
+V1      ADA-2            ALB-2            BW-2             
+--------------------
+
+Relations included after final step:
+CL      ADA-2            AGE-2            
+V1      ADA-2            ALB-2            BW-2             
+--------------------
+
+Relations included after final step:
+CL      ADA-2            AGE-2            
+V1      ADA-2            ALB-2            BW-2             
+--------------------
+
+Relations included after final step:
+CL      ADA-2            AGE-2            
+V1      ADA-2            ALB-2            BW-2             
+--------------------
+
+V1CREAT-2        PVAL  10594.14491  10588.48242              5.66249  >   3.84150    1        YES!  0.017331 
+Relations included after final step:
+CL      ADA-2            AGE-2            
+V1      ADA-2            ALB-2            BW-2             CREAT-2          
+--------------------
+
+CLAGE-1          PVAL  10588.48242  10593.98720             -5.50478  >  -6.63490   -1        YES!  0.018965 
+V1CREAT-1        PVAL  10593.98720  10599.24943             -5.26223  >  -6.63490   -1        YES!  0.021793 
+Relations included after final step:
+CL      ADA-2            
+V1      ADA-2            ALB-2            BW-2             
+--------------------
+
+Relations included after final step:
+CL      ADA-2            
+V1      ADA-2            ALB-2            BW-2             
+--------------------
+

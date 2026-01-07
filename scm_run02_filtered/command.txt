@@ -1,1 +1,0 @@
-/usr/local/bin/scmplus run02back.scm -dir=scm_run02_filtered -fast
