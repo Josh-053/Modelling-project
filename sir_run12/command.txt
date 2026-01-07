@@ -1,0 +1,1 @@
+/usr/local/bin/sir run12.mod -dir=sir_run12

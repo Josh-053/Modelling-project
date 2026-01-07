@@ -1,0 +1,1 @@
+/usr/local/bin/scmplus run08.scm -maxevals=9999 -dir=scm_run08_2

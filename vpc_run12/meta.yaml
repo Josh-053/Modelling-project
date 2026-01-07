@@ -1,0 +1,132 @@
+command_line: /usr/local/bin/vpc -samples=1000 -auto_bin=auto -dir=vpc_run12 -lloq=1
+  -dv=CONC_M7 -idv=TAD -nozip run12.mod
+common_options:
+  abort_on_fail: 0
+  accepted_ofv_difference: 0.5
+  add_retries: 0
+  always_datafile_in_nmrun: 0
+  check_nmtran: 0
+  clean: 3
+  compress: 0
+  crash_restarts: 4
+  debug_rmd: 0
+  degree: 0.1
+  directory: /home/ali/Documents/GitHub/Modelling-project/vpc_run12/
+  display_iterations: 0
+  handle_crashes: 1
+  handle_msfo: 0
+  html: 0
+  large_omega_cv_limit: 0.8
+  large_sigma_cv_limit: 0.8
+  large_theta_cv_limit: 0.5
+  last_est_complete: 0
+  lsf_sleep: 3
+  min_retries: 0
+  missing_data_token: -99
+  model_subdir: 0
+  nice: 19
+  nm_output: ext,cov,cor,coi,phi,phm,cnv,smt,rmt,npd,npe,npi,npl,ets
+  nm_version: default
+  nmfe: 1
+  nodes: 0
+  pdf: 1
+  picky: 0
+  prepend_model_file_name: 0
+  quick_summarize: 0
+  retries: 0
+  rmarkdown: 1
+  rplots: 0
+  run_on_lsf: 0
+  run_on_sge: 0
+  run_on_slurm: 0
+  run_on_torque: 0
+  run_on_ud: 0
+  run_on_zink: 0
+  seed: 274914
+  send_email: 0
+  shrinkage: 0
+  significant_digits_accept: 0
+  so: 0
+  template_directory_rplots: /usr/local/share/perl5/5.40/PsN_5_6_0/R-scripts
+  template_file_rplots: vpc_default.Rmd
+  threads: 5
+  tweak_inits: 1
+  verbose: 0
+  zip: 0
+finish_time: 2026-01-07 11:24:39
+model_files: /home/ali/Documents/GitHub/Modelling-project/run12.mod
+NONMEM_directory: /home/ali/nm760
+NONMEM_version: 7.6
+PsN_version: 5.6.0
+R_LIB_PATHS:
+  - /home/ali/R/x86_64-redhat-linux-gnu-library/4.5
+  - /usr/local/share/perl5/5.40/PsN_5_6_0/Rlib
+  - /usr/lib64/R/library
+  - /usr/share/R/library
+R_packages:
+  - cli-3.6.5 from CRAN (R 4.5.2)
+  - codetools-0.2-20 from CRAN (R 4.5.2)
+  - digest-0.6.37 from CRAN (R 4.5.2)
+  - dplyr-1.1.4 from CRAN (R 4.5.2)
+  - evaluate-1.0.5 from CRAN (R 4.5.2)
+  - farver-2.1.2 from CRAN (R 4.5.2)
+  - fastmap-1.2.0 from CRAN (R 4.5.2)
+  - foreach-1.5.2 from CRAN (R 4.5.2)
+  - gam-1.22-6 from CRAN (R 4.5.2)
+  - generics-0.1.4 from CRAN (R 4.5.2)
+  - ggplot2-4.0.0 from CRAN (R 4.5.2)
+  - glue-1.8.0 from CRAN (R 4.5.2)
+  - gtable-0.3.6 from CRAN (R 4.5.2)
+  - htmltools-0.5.8.1 from CRAN (R 4.5.2)
+  - iterators-1.0.14 from CRAN (R 4.5.2)
+  - knitr-1.50 from CRAN (R 4.5.2)
+  - lattice-0.22-7 from CRAN (R 4.5.2)
+  - lifecycle-1.0.4 from CRAN (R 4.5.2)
+  - magrittr-2.0.4 from CRAN (R 4.5.2)
+  - pillar-1.11.1 from CRAN (R 4.5.2)
+  - pkgconfig-2.0.3 from CRAN (R 4.5.2)
+  - PsNR-0.2.1 from local (/home/ali/Applications/PsN-Source/PsNR)
+  - R6-2.6.1 from CRAN (R 4.5.2)
+  - RColorBrewer-1.1-3 from CRAN (R 4.5.2)
+  - rlang-1.1.6 from CRAN (R 4.5.2)
+  - rmarkdown-2.30 from CRAN (R 4.5.2)
+  - rsconnect-1.6.1 from CRAN (R 4.5.2)
+  - rstudioapi-0.17.1 from CRAN (R 4.5.2)
+  - S7-0.2.0 from CRAN (R 4.5.2)
+  - scales-1.4.0 from CRAN (R 4.5.2)
+  - sessioninfo-1.2.3 from CRAN (R 4.5.2)
+  - tibble-3.3.0 from CRAN (R 4.5.2)
+  - tidyselect-1.2.1 from CRAN (R 4.5.2)
+  - vctrs-0.6.5 from CRAN (R 4.5.2)
+  - vpc-1.2.2 from CRAN (R 4.5.2)
+  - withr-3.0.2 from CRAN (R 4.5.2)
+  - xfun-0.54 from CRAN (R 4.5.2)
+  - xpose4-4.7.4 from CRAN (R 4.5.2)
+  - yaml-2.3.10 from CRAN (R 4.5.2)
+R_system: x86_64, linux-gnu
+R_version: 4.5.2
+start_time: 2026-01-07 11:17:53
+tool_name: vpc
+tool_options:
+  bin_array: ''
+  boxcox_lambda: 0
+  confidence_interval: 95
+  copy_data: 1
+  dv: CONC_M7
+  fine_pi: 0
+  flip_comments: 0
+  idv: TAD
+  in_filter: ''
+  keep_estimation: 0
+  levels: ''
+  lloq: 1
+  lnDV: 0
+  mix: 0
+  n_simulation_models: 1
+  noprediction: 0
+  offset_rawres: 1
+  predcorr: 0
+  refcorr_idv: 0
+  sim_table: ''
+  so: 0
+  varcorr: 0

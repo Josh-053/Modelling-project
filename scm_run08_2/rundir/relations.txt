@@ -1,0 +1,504 @@
+$VAR1 = {
+          'CL' => {
+                    'ADA' => {
+                               'bounds' => {
+                                             '2' => {
+                                                      'upper' => [
+                                                                   5
+                                                                 ],
+                                                      'lower' => [
+                                                                   -1
+                                                                 ]
+                                                    },
+                                             '1' => {
+                                                      'lower' => [],
+                                                      'upper' => []
+                                                    }
+                                           },
+                               'code' => {
+                                           '1' => [
+                                                    '   CLADA = 1
+'
+                                                  ],
+                                           '2' => [
+                                                    'IF(ADA.EQ.0) CLADA = 1  ; Most common
+',
+                                                    'IF(ADA.EQ.1) CLADA = ( 1 + THETA(1))
+'
+                                                  ]
+                                         },
+                               'ofv_changes' => {
+                                                  '1' => '6.63',
+                                                  '6' => '16.81',
+                                                  '10' => '23.21',
+                                                  '8' => '20.09',
+                                                  '2' => '9.21',
+                                                  '9' => '21.67',
+                                                  '7' => '18.48',
+                                                  '5' => '15.09',
+                                                  '4' => '13.28',
+                                                  '3' => '11.34'
+                                                },
+                               'continuous' => 0,
+                               'nthetas' => {
+                                              '2' => 1,
+                                              '1' => 0
+                                            },
+                               'state' => 1,
+                               'inits' => {
+                                            '1' => [],
+                                            '2' => [
+                                                     '-0.001'
+                                                   ]
+                                          }
+                             },
+                    'SEX' => {
+                               'continuous' => 0,
+                               'ofv_changes' => {},
+                               'code' => {
+                                           '1' => [
+                                                    '   CLSEX = 1
+'
+                                                  ],
+                                           '2' => [
+                                                    'IF(SEX.EQ.1) CLSEX = 1  ; Most common
+',
+                                                    'IF(SEX.EQ.0) CLSEX = ( 1 + THETA(1))
+'
+                                                  ]
+                                         },
+                               'bounds' => {
+                                             '2' => {
+                                                      'upper' => [
+                                                                   5
+                                                                 ],
+                                                      'lower' => [
+                                                                   -1
+                                                                 ]
+                                                    },
+                                             '1' => {
+                                                      'lower' => [],
+                                                      'upper' => []
+                                                    }
+                                           },
+                               'inits' => {
+                                            '1' => [],
+                                            '2' => [
+                                                     '-0.001'
+                                                   ]
+                                          },
+                               'state' => 1,
+                               'nthetas' => {
+                                              '1' => 0,
+                                              '2' => 1
+                                            }
+                             },
+                    'ALB' => {
+                               'inits' => {
+                                            '1' => [],
+                                            '2' => [
+                                                     '8.4e-05'
+                                                   ]
+                                          },
+                               'state' => 1,
+                               'nthetas' => {
+                                              '2' => 1,
+                                              '1' => 0
+                                            },
+                               'continuous' => 1,
+                               'ofv_changes' => {},
+                               'code' => {
+                                           '2' => [
+                                                    'CLALB = ( 1 + THETA(1)*(ALB - 31.87))
+'
+                                                  ],
+                                           '1' => [
+                                                    '   CLALB = 1
+'
+                                                  ]
+                                         },
+                               'bounds' => {
+                                             '2' => {
+                                                      'upper' => [
+                                                                   '0.084'
+                                                                 ],
+                                                      'lower' => [
+                                                                   '-0.135'
+                                                                 ]
+                                                    },
+                                             '1' => {
+                                                      'upper' => [],
+                                                      'lower' => []
+                                                    }
+                                           }
+                             },
+                    'BW' => {
+                              'nthetas' => {
+                                             '1' => 0,
+                                             '2' => 1
+                                           },
+                              'inits' => {
+                                           '2' => [
+                                                    '4.2e-05'
+                                                  ],
+                                           '1' => []
+                                         },
+                              'state' => 1,
+                              'bounds' => {
+                                            '2' => {
+                                                     'lower' => [
+                                                                  '-0.054'
+                                                                ],
+                                                     'upper' => [
+                                                                  '0.042'
+                                                                ]
+                                                   },
+                                            '1' => {
+                                                     'lower' => [],
+                                                     'upper' => []
+                                                   }
+                                          },
+                              'continuous' => 1,
+                              'code' => {
+                                          '2' => [
+                                                   'CLBW = ( 1 + THETA(1)*(BW - 65.8))
+'
+                                                 ],
+                                          '1' => [
+                                                   '   CLBW = 1
+'
+                                                 ]
+                                        },
+                              'ofv_changes' => {}
+                            },
+                    'AGE' => {
+                               'ofv_changes' => {},
+                               'code' => {
+                                           '2' => [
+                                                    'CLAGE = ( 1 + THETA(1)*(AGE - 33.17))
+'
+                                                  ],
+                                           '1' => [
+                                                    '   CLAGE = 1
+'
+                                                  ]
+                                         },
+                               'continuous' => 1,
+                               'bounds' => {
+                                             '2' => {
+                                                      'upper' => [
+                                                                   '0.074'
+                                                                 ],
+                                                      'lower' => [
+                                                                   '-0.050'
+                                                                 ]
+                                                    },
+                                             '1' => {
+                                                      'upper' => [],
+                                                      'lower' => []
+                                                    }
+                                           },
+                               'inits' => {
+                                            '2' => [
+                                                     '-5e-05'
+                                                   ],
+                                            '1' => []
+                                          },
+                               'state' => 1,
+                               'nthetas' => {
+                                              '2' => 1,
+                                              '1' => 0
+                                            }
+                             },
+                    'CREAT' => {
+                                 'inits' => {
+                                              '1' => [],
+                                              '2' => [
+                                                       '0.001176'
+                                                     ]
+                                            },
+                                 'state' => 1,
+                                 'nthetas' => {
+                                                '1' => 0,
+                                                '2' => 1
+                                              },
+                                 'continuous' => 1,
+                                 'ofv_changes' => {},
+                                 'code' => {
+                                             '2' => [
+                                                      'CLCREAT = ( 1 + THETA(1)*(CREAT - 1.04))
+'
+                                                    ],
+                                             '1' => [
+                                                      '   CLCREAT = 1
+'
+                                                    ]
+                                           },
+                                 'bounds' => {
+                                               '2' => {
+                                                        'lower' => [
+                                                                     '-1.266'
+                                                                   ],
+                                                        'upper' => [
+                                                                     '1.176'
+                                                                   ]
+                                                      },
+                                               '1' => {
+                                                        'upper' => [],
+                                                        'lower' => []
+                                                      }
+                                             }
+                               }
+                  },
+          'V1' => {
+                    'CREAT' => {
+                                 'inits' => {
+                                              '1' => [],
+                                              '2' => [
+                                                       '0.00119'
+                                                     ]
+                                            },
+                                 'state' => 1,
+                                 'nthetas' => {
+                                                '2' => 1,
+                                                '1' => 0
+                                              },
+                                 'code' => {
+                                             '2' => [
+                                                      'V1CREAT = ( 1 + THETA(1)*(CREAT - 1.03))
+'
+                                                    ],
+                                             '1' => [
+                                                      '   V1CREAT = 1
+'
+                                                    ]
+                                           },
+                                 'ofv_changes' => {},
+                                 'continuous' => 1,
+                                 'bounds' => {
+                                               '2' => {
+                                                        'lower' => [
+                                                                     '-1.250'
+                                                                   ],
+                                                        'upper' => [
+                                                                     '1.190'
+                                                                   ]
+                                                      },
+                                               '1' => {
+                                                        'upper' => [],
+                                                        'lower' => []
+                                                      }
+                                             }
+                               },
+                    'SEX' => {
+                               'nthetas' => {
+                                              '1' => 0,
+                                              '2' => 1
+                                            },
+                               'inits' => {
+                                            '1' => [],
+                                            '2' => [
+                                                     '-0.001'
+                                                   ]
+                                          },
+                               'state' => 1,
+                               'bounds' => {
+                                             '1' => {
+                                                      'lower' => [],
+                                                      'upper' => []
+                                                    },
+                                             '2' => {
+                                                      'upper' => [
+                                                                   5
+                                                                 ],
+                                                      'lower' => [
+                                                                   -1
+                                                                 ]
+                                                    }
+                                           },
+                               'code' => {
+                                           '1' => [
+                                                    '   V1SEX = 1
+'
+                                                  ],
+                                           '2' => [
+                                                    'IF(SEX.EQ.1) V1SEX = 1  ; Most common
+',
+                                                    'IF(SEX.EQ.0) V1SEX = ( 1 + THETA(1))
+'
+                                                  ]
+                                         },
+                               'ofv_changes' => {},
+                               'continuous' => 0
+                             },
+                    'ADA' => {
+                               'nthetas' => {
+                                              '1' => 0,
+                                              '2' => 1
+                                            },
+                               'inits' => {
+                                            '1' => [],
+                                            '2' => [
+                                                     '-0.001'
+                                                   ]
+                                          },
+                               'state' => 1,
+                               'bounds' => {
+                                             '1' => {
+                                                      'lower' => [],
+                                                      'upper' => []
+                                                    },
+                                             '2' => {
+                                                      'upper' => [
+                                                                   5
+                                                                 ],
+                                                      'lower' => [
+                                                                   -1
+                                                                 ]
+                                                    }
+                                           },
+                               'continuous' => 0,
+                               'ofv_changes' => {},
+                               'code' => {
+                                           '2' => [
+                                                    'IF(ADA.EQ.0) V1ADA = 1  ; Most common
+',
+                                                    'IF(ADA.EQ.1) V1ADA = ( 1 + THETA(1))
+'
+                                                  ],
+                                           '1' => [
+                                                    '   V1ADA = 1
+'
+                                                  ]
+                                         }
+                             },
+                    'ALB' => {
+                               'bounds' => {
+                                             '2' => {
+                                                      'lower' => [
+                                                                   '-0.134'
+                                                                 ],
+                                                      'upper' => [
+                                                                   '0.085'
+                                                                 ]
+                                                    },
+                                             '1' => {
+                                                      'upper' => [],
+                                                      'lower' => []
+                                                    }
+                                           },
+                               'continuous' => 1,
+                               'code' => {
+                                           '2' => [
+                                                    'V1ALB = ( 1 + THETA(1)*(ALB - 31.84))
+'
+                                                  ],
+                                           '1' => [
+                                                    '   V1ALB = 1
+'
+                                                  ]
+                                         },
+                               'ofv_changes' => {},
+                               'nthetas' => {
+                                              '1' => 0,
+                                              '2' => 1
+                                            },
+                               'inits' => {
+                                            '1' => [],
+                                            '2' => [
+                                                     '8.5e-05'
+                                                   ]
+                                          },
+                               'state' => 1
+                             },
+                    'AGE' => {
+                               'bounds' => {
+                                             '2' => {
+                                                      'lower' => [
+                                                                   '-0.050'
+                                                                 ],
+                                                      'upper' => [
+                                                                   '0.074'
+                                                                 ]
+                                                    },
+                                             '1' => {
+                                                      'lower' => [],
+                                                      'upper' => []
+                                                    }
+                                           },
+                               'ofv_changes' => {},
+                               'code' => {
+                                           '2' => [
+                                                    'V1AGE = ( 1 + THETA(1)*(AGE - 33.17))
+'
+                                                  ],
+                                           '1' => [
+                                                    '   V1AGE = 1
+'
+                                                  ]
+                                         },
+                               'continuous' => 1,
+                               'nthetas' => {
+                                              '2' => 1,
+                                              '1' => 0
+                                            },
+                               'inits' => {
+                                            '2' => [
+                                                     '-5e-05'
+                                                   ],
+                                            '1' => []
+                                          },
+                               'state' => 1
+                             },
+                    'BW' => {
+                              'continuous' => 1,
+                              'code' => {
+                                          '2' => [
+                                                   'V1BW = ( 1 + THETA(1)*(BW - 65.91))
+'
+                                                 ],
+                                          '1' => [
+                                                   '   V1BW = 1
+'
+                                                 ]
+                                        },
+                              'ofv_changes' => {},
+                              'bounds' => {
+                                            '2' => {
+                                                     'upper' => [
+                                                                  '0.042'
+                                                                ],
+                                                     'lower' => [
+                                                                  '-0.054'
+                                                                ]
+                                                   },
+                                            '1' => {
+                                                     'lower' => [],
+                                                     'upper' => []
+                                                   }
+                                          },
+                              'inits' => {
+                                           '1' => [],
+                                           '2' => [
+                                                    '4.2e-05'
+                                                  ]
+                                         },
+                              'state' => 1,
+                              'nthetas' => {
+                                             '1' => 0,
+                                             '2' => 1
+                                           }
+                            }
+                  }
+        };
+$VAR1->{'CL'}{'SEX'}{'ofv_changes'} = $VAR1->{'CL'}{'ADA'}{'ofv_changes'};
+$VAR1->{'CL'}{'ALB'}{'ofv_changes'} = $VAR1->{'CL'}{'ADA'}{'ofv_changes'};
+$VAR1->{'CL'}{'BW'}{'ofv_changes'} = $VAR1->{'CL'}{'ADA'}{'ofv_changes'};
+$VAR1->{'CL'}{'AGE'}{'ofv_changes'} = $VAR1->{'CL'}{'ADA'}{'ofv_changes'};
+$VAR1->{'CL'}{'CREAT'}{'ofv_changes'} = $VAR1->{'CL'}{'ADA'}{'ofv_changes'};
+$VAR1->{'V1'}{'CREAT'}{'ofv_changes'} = $VAR1->{'CL'}{'ADA'}{'ofv_changes'};
+$VAR1->{'V1'}{'SEX'}{'ofv_changes'} = $VAR1->{'CL'}{'ADA'}{'ofv_changes'};
+$VAR1->{'V1'}{'ADA'}{'ofv_changes'} = $VAR1->{'CL'}{'ADA'}{'ofv_changes'};
+$VAR1->{'V1'}{'ALB'}{'ofv_changes'} = $VAR1->{'CL'}{'ADA'}{'ofv_changes'};
+$VAR1->{'V1'}{'AGE'}{'ofv_changes'} = $VAR1->{'CL'}{'ADA'}{'ofv_changes'};
+$VAR1->{'V1'}{'BW'}{'ofv_changes'} = $VAR1->{'CL'}{'ADA'}{'ofv_changes'};
