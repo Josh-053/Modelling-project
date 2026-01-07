@@ -1,0 +1,68 @@
+---
+title: "GOF Plots"
+format: html
+editor: visual
+---
+```{r}
+library(ggplot2)
+```
+
+
+#IPRED vs Time
+```{r}
+setwd('C:/Users/Esther Aderinsola/Documents/pharmacometrics/Modeling/Project')
+dat <- read.table (file='run12_sdtab', skip=1, header=T)
+plot (x=dat$IPRED, y=dat$CONC_M7, type='p', pch=19, col='darkblue',
+      xlab='IPRED', ylab='CONC_M7', main='IPRED vs OBS' )
+```
+
+# Population Prediction (PRED) vs OBS
+```{r}
+setwd('C:/Users/Esther Aderinsola/Documents/pharmacometrics/Modeling/Project')
+dat <- read.table (file='run12_sdtab', skip=1, header=T)
+plot (x=dat$PRED, y=dat$CONC_M7, type='p', pch=19, col='darkblue',
+      xlab='PRED', ylab='CONC_M7', main='PRED vs OBS' ) +
+  abline(1, 1, lty=2)
+```
+
+
+# Logaritmic scale Population Prediction (PRED) vs OBS
+```{r}
+setwd('C:/Users/Esther Aderinsola/Documents/pharmacometrics/Modeling/Project')
+dat <- read.table (file='run12_sdtab', skip=1, header=T)
+plot (x=dat$PRED, y=dat$CONC_M7, type='p', pch=19, col='darkblue',
+      xlab='PRED', ylab='CONC_M7', main='PRED vs OBS' , log='xy') +
+  abline(1, 1, lty=2)
+```
+
+#WRES vs PRED
+```{r}
+setwd('C:/Users/Esther Aderinsola/Documents/pharmacometrics/Modeling/Project')
+dat <- read.table (file='run12_sdtab', skip=1, header=T)
+plot (x=dat$PRED, y=dat$WRES, type='p', pch=16, col='darkblue',
+      xlab='PRED', ylab='WRES', main='PRED vs WRES', ylim = c(-15, 15)) +
+  
+  abline(h=0, lty=2)
+ abline(h = -3, lty = 2) # -3 line 
+ abline(h = 3, lty = 2) # +3 line
+```
+
+#PRED vs RES
+```{r}
+setwd('C:/Users/Esther Aderinsola/Documents/pharmacometrics/Modeling/Project')
+dat <- read.table (file='run12_sdtab', skip=1, header=T)
+plot (x=dat$PRED, y=dat$WRES, type='p', pch=19, col='darkblue',
+      xlab='PRED', ylab='WRES', main='run12_sdtab' ) +
+  abline(h=0, lty=2)
+```
+
+#WRES vs Time after Dose
+```{r}
+setwd('C:/Users/Esther Aderinsola/Documents/pharmacometrics/Modeling/Project')
+dat <- read.table (file='run12_sdtab', skip=1, header=T)
+plot (x=dat$TIME, y=dat$WRES, type='p', pch=10, col='darkred',
+      xlab='TIME', ylab='WRES', main='WRES vs Time', ylim = c(-10, 10)) +
+  abline(h=0, lty=2)
+```
+
+
