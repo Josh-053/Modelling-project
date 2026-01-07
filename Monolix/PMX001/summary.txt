@@ -1,0 +1,112 @@
+********************************************************************************
+*                           PMX001.mlxtran                                     *
+*                            at                                                *
+*                           Monolix version : 2024R1                           *
+********************************************************************************
+
+
+ESTIMATION OF THE POPULATION PARAMETERS ________________________________________
+
+Fixed Effects ----------------------------     se_sa    rse(%)   P2.5_sa  P97.5_sa
+V_pop    :                            5.33     0.219       4.1      4.92      5.78
+kint_pop :                            3.43       nan         0       nan       nan
+KS_pop   :                         0.00158       nan         0       nan       nan
+ksyn_pop :                            7.21       nan         0       nan       nan
+R0_pop   :                         0.00127       nan         0       nan       nan
+Cl_pop   :                        2.07e-06  7.84e-07      37.8  1.05e-06  4.08e-06
+Q_pop    :                            4.55       nan         0       nan       nan
+V2_pop   :                            2.31       nan         0       nan       nan
+
+Standard Deviation of the Random Effects -
+omega_V  :                           0.355    0.0296      8.34     0.301     0.417
+omega_Cl :                            2.98     0.254      8.51      2.53      3.52
+
+Error Model Parameters -------------------
+a        :                        2.22e-16         0        69         0  6.51e-16
+b        :                            0.66   0.00907      1.37     0.642     0.678
+
+Elapsed time (seconds):  1.2e+04
+CPU time     (seconds):  2.4e+04
+Exploratory phase iterations:      410 (Autostop)
+Smoothing phase iterations:         58 (Manual stop)
+
+ _______________________________________________________________________________
+
+
+
+ESTIMATION OF THE INDIVIDUAL PARAMETERS ________________________________________
+
+
+Estimation of the individual parameters by Conditional Distribution ------------
+                 min            Q1        median            Q3           max  shrinkage(%)
+V    :          2.07          4.36           5.3          6.91          11.2         0.571
+kint :          3.43          3.43          3.43          3.43          3.43           nan
+KS   :       0.00158       0.00158       0.00158       0.00158       0.00158           nan
+ksyn :          7.21          7.21          7.21          7.21          7.21           nan
+R0   :       0.00127       0.00127       0.00127       0.00127       0.00127           nan
+Cl   :      2.43e-09       4.9e-07      2.24e-06      3.25e-05       0.00195          9.77
+Q    :          4.55          4.55          4.55          4.55          4.55           nan
+V2   :          2.31          2.31          2.31          2.31          2.31           nan
+
+Elapsed time (seconds):  2.5e+02
+CPU time     (seconds):  6.2e+02
+Iterations:      445 (Autostop)
+
+ -------------------------------------------------------------------------------
+
+
+Estimation of the individual parameters by Conditional Mode --------------------
+                 min            Q1        median            Q3           max  shrinkage(%)
+V    :          2.14          4.28          5.21          6.93          11.6          1.02
+kint :          3.43          3.43          3.43          3.43          3.43           nan
+KS   :       0.00158       0.00158       0.00158       0.00158       0.00158           nan
+ksyn :          7.21          7.21          7.21          7.21          7.21           nan
+R0   :       0.00127       0.00127       0.00127       0.00127       0.00127           nan
+Cl   :      2.43e-09      3.05e-07      1.37e-06      9.41e-06      0.000901          8.16
+Q    :          4.55          4.55          4.55          4.55          4.55           nan
+V2   :          2.31          2.31          2.31          2.31          2.31           nan
+
+Elapsed time (seconds):       11
+CPU time     (seconds):       41
+
+ -------------------------------------------------------------------------------
+
+ _______________________________________________________________________________
+
+
+
+ESTIMATION OF THE FISHER INFORMATION MATRIX ____________________________________
+
+
+Estimation of the Fisher information matrix by Stochastic Approximation --------
+
+Correlation Matrix :
+   V_pop         1
+kint_pop       nan       nan
+  KS_pop       nan       nan       nan
+ksyn_pop       nan       nan       nan       nan
+  R0_pop       nan       nan       nan       nan       nan
+  Cl_pop5.0696e-05       nan       nan       nan       nan         1
+   Q_pop       nan       nan       nan       nan       nan       nan       nan
+  V2_pop       nan       nan       nan       nan       nan       nan       nan       nan
+ omega_V-0.00063697       nan       nan       nan       nan-9.932e-05       nan       nan         1
+omega_Cl3.4036e-05       nan       nan       nan       nan -0.058166       nan       nan9.0602e-05         1
+       a-0.0001676       nan       nan       nan       nan0.00024233       nan       nan-6.3022e-05 8.502e-05         1
+       b 0.0019063       nan       nan       nan       nan 0.0012442       nan       nan-0.0013436-0.00055959 -0.054786         1
+
+WARNING : Impossible to compute the eigen values of the correlation matrix.
+
+Elapsed time (seconds):  3.3e+02
+CPU time     (seconds):  8.8e+02
+Iterations:       58 (Manual stop)
+
+ -------------------------------------------------------------------------------
+
+ _______________________________________________________________________________
+
+
+DATASET INFORMATION
+Number of individuals: 75
+Number of observations (CONC_M7): 2801
+Number of doses: 300
+

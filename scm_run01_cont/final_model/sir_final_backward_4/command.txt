@@ -1,0 +1,1 @@
+/usr/local/bin/sir -samples=2000 -resamples=1000 -dir=sir_final_backward_4 final_backward_4.mod

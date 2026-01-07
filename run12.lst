@@ -1,5 +1,5 @@
-wo 07 jan 2026 10:16:32 CET
-;; 1. Based on: run11
+wo 07 jan 2026 21:31:04 CET
+;; 1. Based on: run09
 ;; 2. Description: PMX001 2CMT LINEAR M7+ (COV MODEL)
 ;; Joshua I., Ali K.
 ;; 2025-12-09
@@ -78,7 +78,7 @@ $ESTIMATION METHOD=1 INTERACTION ; FOCE-I
 $COVARIANCE PRINT=E UNCONDITIONAL MATRIX=S
  ; output table for standard outcomes
 $TABLE      ID TIME TAD DV EVID PRED IPRED WRES IWRES RES IRES CWRES
-            NOPRINT ONEHEADER FILE=run12_sdtab
+            CRES NOPRINT ONEHEADER FILE=run12_sdtab
  ; output table for PK parameters
 $TABLE      ID CL V1 V2 Q K10 K12 K21 NOPRINT NOAPPEND ONEHEADER
             FILE=run12_patab
@@ -212,7 +212,7 @@ Current Date:        7 JAN 2026
  RFORMAT:
  FIXED_EFFECT_ETAS:
 0USER-CHOSEN ITEMS:
- ID TIME TAD CONC_M7 EVID IPRED IWRES IRES CWRES
+ ID TIME TAD CONC_M7 EVID IPRED IWRES IRES CWRES CRES
 0-- TABLE   2 --
 0RECORDS ONLY:    ALL
 04 COLUMNS APPENDED:    NO
@@ -421,9 +421,9 @@ Current Date:        7 JAN 2026
  TOTAL EFFECTIVE ETAS (NIND*NETA):                           150
   
  #TERE:
- Elapsed estimation  time in seconds:   239.16
- Elapsed covariance  time in seconds:    54.75
- Elapsed postprocess time in seconds:     3.74
+ Elapsed estimation  time in seconds:   238.82
+ Elapsed covariance  time in seconds:    53.91
+ Elapsed postprocess time in seconds:     3.73
 1
  
  
@@ -775,7 +775,7 @@ Current Date:        7 JAN 2026
  
          2.63E-01  4.31E-01  5.78E-01  8.11E-01  9.00E-01  1.17E+00  1.32E+00  1.64E+00  1.89E+00
  
- Elapsed finaloutput time in seconds:     0.72
- #CPUT: Total CPU Time in Seconds,      301.311
+ Elapsed finaloutput time in seconds:     0.70
+ #CPUT: Total CPU Time in Seconds,      300.287
 Stop Time:
-wo 07 jan 2026 10:21:39 CET
+wo 07 jan 2026 21:36:10 CET

@@ -10,57 +10,62 @@ ID = {use=identifier}
 TIME = {use=time}
 DOSE = {use=amount}
 RATE = {use=rate}
-ADA = {use=covariate, type=categorical}
+ADA = {use=covariate, type=continuous}
 BW = {use=covariate, type=continuous}
 ALB = {use=covariate, type=continuous}
 SEX = {use=covariate, type=categorical}
 AGE = {use=covariate, type=continuous}
 CREAT = {use=covariate, type=continuous}
-COL = {use=occasion}
+COL = {use=covariate, type=categorical}
 EVID = {use=eventidentifier}
-BLQ = {use=censored}
 CONC_M7 = {use=observation, type=continuous}
 
 <MODEL>
 
 [COVARIATE]
-input = {AGE, ALB, BW, CREAT, SEX}
+input = {ALB, ADA, AGE, BW, CREAT, SEX}
 
 SEX = {type=categorical, categories={'0', '1'}}
 
 [INDIVIDUAL]
-input = {Cl_pop, omega_Cl, Q_pop, omega_Q, V1_pop, omega_V1, V2_pop, omega_V2}
+input = {Cl_pop, Q_pop, V2_pop, KS_pop, R0_pop, V_pop, kint_pop, ksyn_pop, omega_Cl, omega_V}
 
 DEFINITION:
 Cl = {distribution=logNormal, typical=Cl_pop, sd=omega_Cl}
-Q = {distribution=logNormal, typical=Q_pop, sd=omega_Q}
-V1 = {distribution=logNormal, typical=V1_pop, sd=omega_V1}
-V2 = {distribution=logNormal, typical=V2_pop, sd=omega_V2}
+Q = {distribution=logNormal, typical=Q_pop, no-variability}
+V2 = {distribution=logNormal, typical=V2_pop, no-variability}
+KS = {distribution=logNormal, typical=KS_pop, no-variability}
+R0 = {distribution=logNormal, typical=R0_pop, no-variability}
+V = {distribution=logNormal, typical=V_pop, sd=omega_V}
+kint = {distribution=logNormal, typical=kint_pop, no-variability}
+ksyn = {distribution=logNormal, typical=ksyn_pop, no-variability}
 
 [LONGITUDINAL]
 input = {a, b}
 
-file = 'lib:infusion_2cpt_ClV1QV2.txt'
+file = 'lib:infusion_2cpt_QSS_VkintKSksynR0ClQV2_outputL.txt'
 
 DEFINITION:
-CONC_M7 = {distribution=normal, prediction=Cc, errorModel=combined1(a, b)}
+CONC_M7 = {distribution=normal, prediction=L, errorModel=combined1(a, b)}
 
 <FIT>
 data = 'CONC_M7'
 model = CONC_M7
 
 <PARAMETER>
-Cl_pop = {value=1.24, method=MLE}
-Q_pop = {value=0.6909999999999999, method=MLE}
-V1_pop = {value=3.146, method=MLE}
-V2_pop = {value=2.851, method=MLE}
+Cl_pop = {value=0.0000014, method=MLE}
+KS_pop = {value=0.000916, method=MLE}
+Q_pop = {value=1.071, method=MLE}
+R0_pop = {value=0.000676, method=MLE}
+V2_pop = {value=6.741, method=MLE}
+V_pop = {value=3.241, method=MLE}
 a = {value=1, method=MLE}
 b = {value=0.3, method=MLE}
 c = {value=1, method=FIXED}
+kint_pop = {value=7.916, method=MLE}
+ksyn_pop = {value=7.651, method=MLE}
 omega_Cl = {value=1, method=MLE}
-omega_Q = {value=1, method=MLE}
-omega_V1 = {value=1, method=MLE}
-omega_V2 = {value=1, method=MLE}
+omega_V = {value=1, method=MLE}
 
 <MONOLIX>
 

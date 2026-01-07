@@ -1,0 +1,99 @@
+---
+title: "GOF Plots"
+format: html
+editor: visual
+---
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+```
+
+# IPRED vs OBS
+
+```{r}
+setwd('/home/ali/Documents/GitHub/Modelling-project') # feel free to change your directory
+dat <- read.table (file='run12_sdtab', skip=1, header=T)
+ggplot(dat %>% filter(CONC_M7 != 0)) + # CWRES used because of FOCE-I
+  geom_point (aes(x=IPRED, y=CONC_M7),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  xlab('IPRED') +
+  ylab('OBS') +
+  theme_minimal()
+```
+
+# Population Prediction (PRED) vs OBS
+
+```{r}
+ggplot(dat %>% filter(CONC_M7 != 0)) +
+  geom_point (aes(x=PRED, y=CONC_M7),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  xlab('PRED') +
+  ylab('OBS') +
+  theme_minimal()
+```
+
+# Logaritmic scale Population Prediction (PRED) vs OBS
+
+```{r}
+ggplot(dat %>% filter(CONC_M7 != 0)) +
+  geom_point (aes(x=log10(PRED), y=log10(CONC_M7)),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  xlab('PRED') +
+  ylab('OBS') +
+  theme_minimal()
+```
+
+# CWRES vs PRED
+
+```{r}
+ggplot(dat) + # CWRES used because of FOCE-I
+  geom_point (aes(x=PRED, y=CWRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  xlab('PRED') +
+  ylab('CWRES') +
+  theme_minimal()
+```
+
+# PRED vs RES
+
+```{r}
+ggplot(dat) +
+  geom_point (aes(x=PRED, y=RES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  xlab('PRED') +
+  ylab('RES') +
+  theme_minimal()
+```
+
+# PRED vs CRES
+
+```{r}
+ggplot(dat) + # CRES used because of FOCE-I
+  geom_point (aes(x=PRED, y=CRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  xlab('PRED') +
+  ylab('CRES') +
+  theme_minimal()
+```
+
+
+# CWRES vs Time after Dose
+
+```{r}
+ggplot(dat %>% filter(CWRES != 0)) + # CWRES used because of FOCE-I
+  geom_point (aes(x=TAD, y=CWRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  xlab('Time after dose') +
+  ylab('CWRES') +
+  theme_minimal()
+
+```
