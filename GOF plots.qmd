@@ -3,66 +3,97 @@ title: "GOF Plots"
 format: html
 editor: visual
 ---
+
 ```{r}
 library(ggplot2)
+library(tidyverse)
 ```
 
+# IPRED vs OBS
 
-#IPRED vs Time
 ```{r}
-setwd('C:/Users/Esther Aderinsola/Documents/pharmacometrics/Modeling/Project')
+setwd('/home/ali/Documents/GitHub/Modelling-project') # feel free to change your directory
 dat <- read.table (file='run12_sdtab', skip=1, header=T)
-plot (x=dat$IPRED, y=dat$CONC_M7, type='p', pch=19, col='darkblue',
-      xlab='IPRED', ylab='CONC_M7', main='IPRED vs OBS' )
+ggplot(dat %>% filter(CONC_M7 != 0)) + # CWRES used because of FOCE-I
+  geom_point (aes(x=IPRED, y=CONC_M7),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  xlab('IPRED') +
+  ylab('OBS') +
+  theme_minimal()
 ```
 
 # Population Prediction (PRED) vs OBS
-```{r}
-setwd('C:/Users/Esther Aderinsola/Documents/pharmacometrics/Modeling/Project')
-dat <- read.table (file='run12_sdtab', skip=1, header=T)
-plot (x=dat$PRED, y=dat$CONC_M7, type='p', pch=19, col='darkblue',
-      xlab='PRED', ylab='CONC_M7', main='PRED vs OBS' ) +
-  abline(1, 1, lty=2)
-```
 
+```{r}
+ggplot(dat %>% filter(CONC_M7 != 0)) +
+  geom_point (aes(x=PRED, y=CONC_M7),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  xlab('PRED') +
+  ylab('OBS') +
+  theme_minimal()
+```
 
 # Logaritmic scale Population Prediction (PRED) vs OBS
+
 ```{r}
-setwd('C:/Users/Esther Aderinsola/Documents/pharmacometrics/Modeling/Project')
-dat <- read.table (file='run12_sdtab', skip=1, header=T)
-plot (x=dat$PRED, y=dat$CONC_M7, type='p', pch=19, col='darkblue',
-      xlab='PRED', ylab='CONC_M7', main='PRED vs OBS' , log='xy') +
-  abline(1, 1, lty=2)
+ggplot(dat %>% filter(CONC_M7 != 0)) +
+  geom_point (aes(x=log10(PRED), y=log10(CONC_M7)),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  xlab('PRED') +
+  ylab('OBS') +
+  theme_minimal()
 ```
 
-#WRES vs PRED
+# CWRES vs PRED
+
 ```{r}
-setwd('C:/Users/Esther Aderinsola/Documents/pharmacometrics/Modeling/Project')
-dat <- read.table (file='run12_sdtab', skip=1, header=T)
-plot (x=dat$PRED, y=dat$WRES, type='p', pch=16, col='darkblue',
-      xlab='PRED', ylab='WRES', main='PRED vs WRES', ylim = c(-15, 15)) +
-  
-  abline(h=0, lty=2)
- abline(h = -3, lty = 2) # -3 line 
- abline(h = 3, lty = 2) # +3 line
+ggplot(dat) + # CWRES used because of FOCE-I
+  geom_point (aes(x=PRED, y=CWRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  xlab('PRED') +
+  ylab('CWRES') +
+  theme_minimal()
 ```
 
-#PRED vs RES
+# PRED vs RES
+
 ```{r}
-setwd('C:/Users/Esther Aderinsola/Documents/pharmacometrics/Modeling/Project')
-dat <- read.table (file='run12_sdtab', skip=1, header=T)
-plot (x=dat$PRED, y=dat$WRES, type='p', pch=19, col='darkblue',
-      xlab='PRED', ylab='WRES', main='run12_sdtab' ) +
-  abline(h=0, lty=2)
+ggplot(dat) +
+  geom_point (aes(x=PRED, y=RES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  xlab('PRED') +
+  ylab('RES') +
+  theme_minimal()
 ```
 
-#WRES vs Time after Dose
+# PRED vs CRES
+
 ```{r}
-setwd('C:/Users/Esther Aderinsola/Documents/pharmacometrics/Modeling/Project')
-dat <- read.table (file='run12_sdtab', skip=1, header=T)
-plot (x=dat$TIME, y=dat$WRES, type='p', pch=10, col='darkred',
-      xlab='TIME', ylab='WRES', main='WRES vs Time', ylim = c(-10, 10)) +
-  abline(h=0, lty=2)
+ggplot(dat) + # CRES used because of FOCE-I
+  geom_point (aes(x=PRED, y=CRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  xlab('PRED') +
+  ylab('CRES') +
+  theme_minimal()
 ```
 
 
+# CWRES vs Time after Dose
+
+```{r}
+ggplot(dat %>% filter(CWRES != 0)) + # CWRES used because of FOCE-I
+  geom_point (aes(x=TAD, y=CWRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  xlab('Time after dose') +
+  ylab('CWRES') +
+  theme_minimal()
+
+```
