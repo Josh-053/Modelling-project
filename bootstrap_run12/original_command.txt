@@ -1,0 +1,1 @@
+/usr/local/bin/bootstrap run12.mod -dir=bootstrap_run12 -samples=1000 -threads=6 -nozip
