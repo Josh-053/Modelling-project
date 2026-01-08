@@ -1,10 +1,10 @@
 PsN version: 5.6.0
-Run started: 2026-01-08 at 10:27:54
+Run started: 2026-01-08 at 10:45:01
 version_and_option_info.txt is overwitten if the run is restarted later using option -directory.
 The original file from the first call is saved as original_version_and_option_info.txt.
 
 Command:
-/usr/local/bin/bootstrap run12.mod -dir=bootstrap_run12 -samples=200 -threads=6 -nozip
+/usr/local/bin/bootstrap run12.mod -dir=bootstrap_run12 -samples=1000 -threads=6 -nozip
 
 NONMEM:
 /home/ali/nm760
@@ -17,7 +17,7 @@ Actual values optional bootstrap options (undefined values not listed):
 -keep_tables=0
 -mceta=0
 -run_base_model=1
--samples=200
+-samples=1000
 -skip_covariance_step_terminated=0
 -skip_estimate_near_boundary=1
 -skip_minimization_terminated=1
@@ -67,7 +67,7 @@ Actual values optional PsN (common) options (undefined values not listed):
 -run_on_torque=0
 -run_on_ud=0
 -run_on_zink=0
--seed=674268
+-seed=885340
 -send_email=0
 -shrinkage=0
 -significant_digits_accept=0
