@@ -1,0 +1,32 @@
+$PK 
+IF (EVID.EQ.1) LASTDOSE = TIME 
+TAD = TIME - LASTDOSE 
+TVCL = THETA(1) 
+TVV1 = THETA(2) 
+TVV2 = THETA(3) 
+ TVQ = THETA(4) 
+IF(ADA.EQ.0) CLADA = 1  ; Most common 
+IF(ADA.EQ.1) CLADA = ( 1 + THETA(5)) 
+V1ALB = ( 1 + THETA(6)*(ALB - 31.84)) 
+  CL = TVCL * EXP(ETA(1)) * CLADA 
+  V1 = TVV1 * EXP(ETA(2)) * V1ALB 
+  V2 = TVV2 
+   Q = TVQ 
+ K10 = CL/V1 
+ K12 = Q/V1 
+ K21 = Q/V2 
+  S1 = V1/1 ; scale prediction based on DOSE (mmol) and DV (mmol/L) 
+  S2 = V2/1 
+$DES DADT(1) = -K10*A(1) -K12*A(1) +K21*A(2) ; ODE for central    compartment 
+     DADT(2) =            K12*A(1) -K21*A(2) ; ODE for peripheral compartment 
+$ERROR 
+IPRED = F 
+LLOQ = 1  ; (mg/L) 
+PROP_SD = SIGMA(1) 
+ADD_SD  = SIGMA(2) 
+IF (BLQ.EQ.1) ADD_SD = ADD_SD + LLOQ 
+W = SQRT(ADD_SD**2+PROP_SD**2) 
+IF (W.LE.0.000001) W=0.000001 ; Protective code 
+IRES=DV-IPRED 
+IWRES=IRES/W 
+Y = IPRED * (1 + EPS(1)) + EPS(2) 
