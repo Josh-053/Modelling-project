@@ -2,7 +2,7 @@
 NONMEM_directory: /home/ali/nm760
 NONMEM_version: 7.6
 PsN_version: 5.6.0
-command_line: /usr/local/bin/bootstrap run12.mod -dir=bootstrap_run12 -samples=200 -threads=6 -nozip
+command_line: /usr/local/bin/bootstrap run12.mod -dir=bootstrap_run12 -samples=1000 -threads=6 -nozip
 common_options:
   abort_on_fail: 0
   accepted_ofv_difference: 0.5
@@ -45,7 +45,7 @@ common_options:
   run_on_torque: 0
   run_on_ud: 0
   run_on_zink: 0
-  seed: 674268
+  seed: 885340
   send_email: 0
   shrinkage: 0
   significant_digits_accept: 0
@@ -58,7 +58,7 @@ common_options:
   zip: 0
 model_files:
   - /home/ali/Documents/GitHub/Modelling-project/run12.mod
-start_time: 2026-01-08 10:27:54
+start_time: 2026-01-08 10:45:01
 tool_name: bootstrap
 tool_options:
   allow_ignore_id: 0
@@ -68,7 +68,7 @@ tool_options:
   keep_tables: 0
   mceta: 0
   run_base_model: 1
-  samples: 200
+  samples: 1000
   skip_covariance_step_terminated: 0
   skip_estimate_near_boundary: 1
   skip_minimization_terminated: 1
