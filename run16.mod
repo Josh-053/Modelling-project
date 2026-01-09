@@ -54,13 +54,13 @@ VMAX = TVVMAX
   S2 = V2/1
 
 $THETA ; values are determined in 3 iterations
-(0.01, 0.944, 2.3) ; [1] CL (L/d)
+(0.01, 0.944, 2.3) ; CL (L/d)
 (0.5, 1.38, 3)  ; VMAX
-(0.001, 0.00758, 0.02) ; KM
-(0.5, 4.42, 9)   ; [2,3] V1 (L)
-(0.00001,  0.000307, 0.0006)  ; V2
-(0.1, 13, 30)   ; Q
-(-100,-3.41223,50) ; CLALB
+(0.001, 0.00758, 0.02) ; KM (mg/L)
+(0.5, 4.42, 9)   ; V1 (L)
+(0.00001,  0.000307, 0.0006)  ; V2 (L)
+(0.1, 13, 30)      ; Q (L/d)
+(-100,-3.41223,50) ; CL_ALB
 
 $DES DADT(1) = -K10*A(1) -K12*A(1) +K21*A(2) -VMAX*A(1)/(KM*V1 + A(1)) ; ODE central    compartment
      DADT(2) =            K12*A(1) -K21*A(2)                           ; ODE peripheral compartment
@@ -87,11 +87,11 @@ IRES=DV-IPRED
 IWRES=IRES/W
 Y = IPRED * (1 + EPS(1)) + EPS(2)
 
-$OMEGA 0.366 ; IIV CL
+$OMEGA 0.366 ; IIV_CL
 
 $SIGMA    ; residual variability
-0.327     ; EPS(1), proportional
-1E-13 FIX ; EPS(2); additive, required by M7+ censoring method
+0.327     ; proportional
+1E-13 FIX ; additive
 
 $EST
 METHOD=1 INTERACTION; FOCE-I

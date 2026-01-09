@@ -25,6 +25,8 @@ library(kableExtra)
 library(ggpubr)
 library(scales)
 library(ggsurvfit)
+library(survival)
+library(survminer)
 ```
 
 ```{r}
@@ -337,11 +339,6 @@ h1 + h2 + h3 + h4 +
 ```{r}
 #| echo: false
 dat3 <- read.table(file = "run16_pa_cov", skip = 1, header = TRUE)
-```
-
-
-```{r}
-#| echo: false
 dat3 <- dat3 %>%
   mutate(COL = as.integer(as.character(COL))) %>%
   group_by(ID) %>%
@@ -361,7 +358,7 @@ dat3 <- dat3 %>%
                    breaks = seq(min(cAUC, na.rm = TRUE),
                                 max(cAUC, na.rm = TRUE),
                                 length.out = 5), # 4 bins → 5 break points
-      right = TRUE, left = TRUE))
+))
 
 # --- 3) Quick summary by group ---
 summary_tbl <- dat3 %>%
@@ -432,113 +429,153 @@ ggsave("QQplot.png", width = 5, height = 4.0, dpi = 300)
 ```
 
 ```{r}
-
+#| echo: false
 # --- 1) Read and normalize COL at subject level (unchanged logic) ---
-dat3 <- read.table(file = "run16_pa_cov", skip = 1, header = TRUE)
+pacov <- read.table(file = "run16_pa_cov", skip = 1, header = TRUE)
+sdtab <- read.table(file = "run16_sdtab", skip = 1, header = TRUE)
+# ---- 2) Keep only what we need from sdtab (ID and TIME), and create an obs index per ID ----
+sdtab_idx <- sdtab %>%
+  select(ID, TIME) %>%           # sdtab has TIME; keep it for merging
+  group_by(ID) %>%
+  mutate(obs = row_number()) %>% # per-ID row index
+  ungroup()
 
+# ---- 3) Create the same obs index on pa_cov (to align rows within each ID) ----
+pacov_idx <- pacov %>%
+  group_by(ID) %>%
+  mutate(obs = row_number()) %>%
+  ungroup()
+
+# ---- 4) Join pa_cov with TIME by (ID, obs) ----
+pacov_with_time <- pacov_idx %>%
+  left_join(sdtab_idx, by = c("ID", "obs")) %>%
+  select(-obs)  # drop the temporary index
+
+dat3 <- as.data.frame(pacov_with_time)
+dat3 <- dat3 %>%  mutate(time = as.numeric(TIME),
+                         group = case_when(
+                           ALB < median(ALB) ~ "Below Median",
+                           ALB >= median(ALB) ~ "Above Median"))
+```
+
+```{r}
+#| include: false
+fit <- survfit(Surv(time = time, event = COL) ~ group, data = dat3)
+ggsurvplot(fit,
+           conf.int = TRUE,
+           pval = FALSE,
+           xlab = "Time",
+           ylab = "Survival Probability",
+           title = "Kaplan-Meier Curve for Colectomy")
+```
+
+```{r}
+#| include: false
+# --- 1) Read and normalize COL at subject level (unchanged logic) ---
+pacov <- read.table(file = "run16_pa_cov", skip = 1, header = TRUE)
+sdtab <- read.table(file = "run16_sdtab", skip = 1, header = TRUE)
+# ---- 2) Keep only what we need from sdtab (ID and TIME), and create an obs index per ID ----
+sdtab_idx <- sdtab %>%
+  select(ID, TIME) %>%           # sdtab has TIME; keep it for merging
+  group_by(ID) %>%
+  mutate(obs = row_number()) %>% # per-ID row index
+  ungroup()
+
+# ---- 3) Create the same obs index on pa_cov (to align rows within each ID) ----
+pacov_idx <- pacov %>%
+  group_by(ID) %>%
+  mutate(obs = row_number()) %>%
+  ungroup()
+
+# ---- 4) Join pa_cov with TIME by (ID, obs) ----
+pacov_with_time <- pacov_idx %>%
+  left_join(sdtab_idx, by = c("ID", "obs")) %>%
+  select(-obs)  # drop the temporary index
+
+dat3 <- pacov_with_time
 dat3 <- dat3 %>%
   mutate(COL = as.integer(as.character(COL))) %>%
   group_by(ID) %>%
   mutate(had_one = any(COL == 1, na.rm = TRUE),
-         COL = if_else(had_one & (is.na(COL) | COL == 0L), 1L, 0L)) %>%
+    COL = if_else(had_one & (is.na(COL) | COL == 0L), 1L, 0L)) %>%
   select(-had_one) %>%
   ungroup()
 
 dat3 <- dat3 %>% mutate(COL = as.numeric(COL))
 
-# --- 2) Coerce cAUC to numeric and grab ONLY the last cAUC per subject ---
-# Replace TIME with your actual time column (if available).
 dat3 <- dat3 %>%
-  mutate(cAUC = suppressWarnings(as.numeric(cAUC)))
-
-last_auc_by_id <- dat3 %>%
+  mutate(cAUC_num = suppressWarnings(as.numeric(cAUC))) %>%
   group_by(ID) %>%
-  # If you have a time column, keep the last by time:
-  arrange(ID, TAD, .by_group = TRUE) %>%  # <-- change TIME if needed
-  slice_tail(n = 1) %>%
-  ungroup() %>%
-  transmute(ID, cAUC_last = cAUC)
+  arrange(TIME, .by_group = TRUE) %>%
+  summarise(
+    AUC0_tlast = max(cAUC_num, na.rm = TRUE),  # final cumulative AUC
+    tlast      = max(TIME, na.rm = TRUE),
+    .groups    = "drop"
+  ) %>%
+  right_join(dat3, by = "ID")  # bring AUC0_tlast back to the full dataset
 
-# Join last cAUC back and overwrite cAUC
-dat3 <- dat3 %>%
-  left_join(last_auc_by_id, by = "ID") %>%
-  mutate(cAUC = cAUC_last) %>%
-  select(-cAUC_last)
-
-# (Recommended) Collapse to ONE row per ID to avoid duplicate weighting later
-# Keep the subject-level status and last cAUC only
-dat3 <- dat3 %>%
-  group_by(ID) %>%
-  slice(1) %>%
-  ungroup()
-
-# --- 3) Factors and quantiles now use "AUC at last point per subject" ---
 dat3 <- dat3 %>%
   mutate(
+    AUC0_tlast = suppressWarnings(as.numeric(AUC0_tlast)),
     COL = factor(COL, levels = c(0, 1),
                  labels = c("No Colectomy", "Colectomy")),
-    quantile = cut(
-      cAUC,
-      breaks = seq(min(cAUC, na.rm = TRUE),
-                   max(cAUC, na.rm = TRUE),
-                   length.out = 5), # 4 bins → 5 breakpoints
-      right = TRUE, left = TRUE
-    )
-  )
+    quantile = cut(AUC0_tlast,
+                   breaks = seq(min(AUC0_tlast, na.rm = TRUE),
+                                max(AUC0_tlast, na.rm = TRUE),
+                                length.out = 5) # 4 bins → 5 break points
+))
 
-# --- 4) Summary by colectomy status (now subject-level) ---
+# --- 3) Quick summary by group ---
 summary_tbl <- dat3 %>%
   group_by(COL) %>%
-  summarise(
-    n = n(),
-    median_cAUC = median(cAUC, na.rm = TRUE),
-    IQR_cAUC = IQR(cAUC, na.rm = TRUE),
-    mean_cAUC = mean(cAUC, na.rm = TRUE),
-    sd_cAUC = sd(cAUC, na.rm = TRUE),
-    .groups = "drop"
-  )
+  summarise(n = n(),
+            median_AUC0_tlast = median(AUC0_tlast),
+            IQR_AUC0_tlast = IQR(AUC0_tlast),
+            mean_AUC0_tlast = mean(AUC0_tlast),
+            sd_AUC0_tlast = sd(AUC0_tlast),
+            .groups = "drop")
 
 print(summary_tbl)
 
-# --- 5) Logistic regression: Colectomy ~ AUC_at_last ---
-logit_model <- glm(COL ~ cAUC, data = dat3, family = binomial)
+# --- 4) Logistic regression: probability of Colectomy ~ AUC0_tlast ---
+# Use numeric 0/1 as response for clarity
+logit_model <- glm(COL ~ AUC0_tlast, data = dat3, family = binomial)
 
-curve_df <- data.frame(
-  cAUC = seq(min(dat3$cAUC, na.rm = TRUE),
-             max(dat3$cAUC, na.rm = TRUE),
-             length.out = 100)
-)
-curve_df$pred_prob <- predict(logit_model, newdata = curve_df, type = "response")
+# Prediction grid across AUC0_tlast range
+curve_df <- data.frame(AUC0_tlast = seq(min(dat3$AUC0_tlast), max(dat3$AUC0_tlast),
+                                  length.out = 100))
+curve_df$pred_prob <- predict(logit_model, newdata = curve_df,
+                              type = "response")
 
 summary_df <- dat3 %>%
   filter(!is.na(quantile)) %>%
   group_by(quantile) %>%
-  summarise(
-    cAUC_min = min(cAUC, na.rm = TRUE),
-    cAUC_max = max(cAUC, na.rm = TRUE),
-    prob_col = mean(COL == "Colectomy", na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
+  summarise(AUC0_tlast_min = min(AUC0_tlast),
+            AUC0_tlast_max = max(AUC0_tlast),
+            prob_col = mean(COL == "Colectomy"),
+            .groups = "drop") %>%
   mutate(
-    perc_label = percent(prob_col, accuracy = 1),
-    x_mid = (cAUC_min + cAUC_max) / 2,
-    y_label = pmax(prob_col * 0.5, 0.07)
-  )
+    perc_label = percent(prob_col, accuracy = 1),            
+    x_mid = (AUC0_tlast_min + AUC0_tlast_max) / 2,
+    y_label = pmax(prob_col * 0.5, 0.07))
 
 rect_df <- bind_rows(
   summary_df %>%
-    transmute(quantile, cAUC_min, cAUC_max, ymin = 0, ymax = 1, type = "No colectomy"),
+    transmute(quantile, AUC0_tlast_min, AUC0_tlast_max, ymin = 0, ymax = 1,
+              type = "No colectomy"),
   summary_df %>%
-    transmute(quantile, cAUC_min, cAUC_max, ymin = 0, ymax = prob_col, type = "Colectomy")
-)
+    transmute(quantile, AUC0_tlast_min, AUC0_tlast_max, ymin = 0, ymax = prob_col,
+              type = "Colectomy"))
 
 ggplot(rect_df) +
-  geom_rect(aes(xmin = cAUC_min, xmax = cAUC_max, ymin = ymin, ymax = ymax, fill = type),
+  geom_rect(aes(xmin = AUC0_tlast_min, xmax = AUC0_tlast_max,
+                ymin = ymin, ymax = ymax, fill = type),
             color = "black", size = 0.3, alpha = 0.8) +
   geom_text(data = summary_df,
             aes(x = x_mid, y = y_label, label = perc_label),
             color = "black", fontface = "bold", size = 4) +
-  geom_line(data = curve_df, aes(x = cAUC, y = pred_prob),
+  geom_line(data = curve_df,
+            aes(x = AUC0_tlast, y = pred_prob),
             color = "#00244D", size = 1) +
   scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
   scale_fill_manual(
@@ -546,14 +583,100 @@ ggplot(rect_df) +
     values = c("No colectomy" = "#C7E3FF", "Colectomy" = "#3C87C9")
   ) +
   labs(
-    x = "AUC at Last Time (mg·day/L)",
+    x = "AUC (from Time = 0 to last) (mg·day/L)",
     y = "Probability of Colectomy",
-    title = "Quartile Plot of AUC (Last Point per Subject) with Colectomy Probability"
+    title = "Quartile Plot of AUC with Colectomy Probability"
   ) +
   theme_minimal() +
   theme(legend.position = "bottom")
+
+ggsave("QQplot.png", width = 5, height = 4.0, dpi = 300)
 ```
 
+```{r}
+library(dplyr)
+library(ggplot2)
+library(scales)
+library(tidyr)
+
+# --- define shared breaks (4 bins -> 5 break points) ---
+brks <- seq(min(dat3$AUC0_tlast, na.rm = TRUE),
+            max(dat3$AUC0_tlast, na.rm = TRUE),
+            length.out = 5)
+
+dat3 <- dat3 %>%
+  mutate(
+    # factor by the shared breaks (include lowest to avoid NA for min)
+    quantile = cut(AUC0_tlast, breaks = brks, right = TRUE, include.lowest = TRUE)
+  )
+
+# --- summary per bin, with exact min/max taken from the shared breaks ---
+summary_df <- dat3 %>%
+  filter(!is.na(quantile)) %>%
+  group_by(quantile) %>%
+  summarise(
+    AUC0_tlast_min = min(AUC0_tlast, na.rm = TRUE),
+    AUC0_tlast_max = max(AUC0_tlast, na.rm = TRUE),
+    prob_col = mean(COL == "Colectomy", na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  # Replace the computed min/max with the exact interval bounds from `brks`
+  # so adjacent bins share boundaries perfectly.
+  # We can do this by mapping factor levels back to brks:
+  mutate(bin_id = as.integer(quantile)) %>%
+  mutate(
+    AUC0_tlast_min = brks[bin_id],
+    AUC0_tlast_max = brks[bin_id + 1],
+    perc_label = percent(prob_col, accuracy = 1),
+    x_mid = (AUC0_tlast_min + AUC0_tlast_max) / 2,
+    y_label = pmax(prob_col * 0.5, 0.07)
+  )
+
+rect_df <- bind_rows(
+  summary_df %>%
+    transmute(quantile, AUC0_tlast_min, AUC0_tlast_max, ymin = 0, ymax = 1,
+              type = "No colectomy"),
+  summary_df %>%
+    transmute(quantile, AUC0_tlast_min, AUC0_tlast_max, ymin = 0, ymax = prob_col,
+              type = "Colectomy")
+)
+
+# prediction curve (unchanged)
+curve_df <- data.frame(
+  AUC0_tlast = seq(min(dat3$AUC0_tlast, na.rm = TRUE),
+                   max(dat3$AUC0_tlast, na.rm = TRUE),
+                   length.out = 100)
+)
+logit_model <- glm(COL ~ AUC0_tlast, data = dat3, family = binomial)
+curve_df$pred_prob <- predict(logit_model, newdata = curve_df, type = "response")
+
+ggplot(rect_df) +
+  geom_rect(aes(xmin = AUC0_tlast_min, xmax = AUC0_tlast_max,
+                ymin = ymin, ymax = ymax, fill = type),
+            # remove borders so adjacent bins visually connect
+            color = NA, size = 0, alpha = 0.85) +
+  geom_text(data = summary_df,
+            aes(x = x_mid, y = y_label, label = perc_label),
+            color = "black", fontface = "bold", size = 4) +
+  geom_line(data = curve_df,
+            aes(x = AUC0_tlast, y = pred_prob),
+            color = "#00244D", size = 1) +
+  scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1),
+                     expand = expansion(mult = 0)) +   # no vertical padding (optional)
+  scale_x_continuous(expand = expansion(mult = 0)) +    # no horizontal padding -> bins flush
+  scale_fill_manual(
+    name = "Status",
+    values = c("No colectomy" = "#C7E3FF", "Colectomy" = "#3C87C9")
+  ) +
+  labs(
+    x = "AUC (from Time = 0 to last) (mg·day/L)",
+    y = "Probability of Colectomy",
+    title = "Quartile Plot of AUC with Colectomy Probability"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+ggsave("QQcorr.png", width = 5, height = 4, units = "in")
+```
 
 ## A5. Goodness of Fit Plots
 
