@@ -7,6 +7,7 @@ editor: visual
 ```{r}
 library(ggplot2)
 library(tidyverse)
+library(patchwork)
 ```
 
 # IPRED vs OBS
@@ -14,86 +15,165 @@ library(tidyverse)
 ```{r}
 setwd('/home/ali/Documents/GitHub/Modelling-project') # feel free to change your directory
 dat <- read.table (file='run12_sdtab', skip=1, header=T)
-ggplot(dat %>% filter(CONC_M7 != 0)) + # CWRES used because of FOCE-I
-  geom_point (aes(x=IPRED, y=CONC_M7),  colour='darkblue', size = 0.4) +
-  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
-  xlab('IPRED') +
-  ylab('OBS') +
-  theme_minimal()
+dat2 <- read.table (file='run16_sdtab', skip=1, header=T)
 ```
 
 # Population Prediction (PRED) vs OBS
 
 ```{r}
-ggplot(dat %>% filter(CONC_M7 != 0)) +
+p1 <- ggplot(dat %>% filter(CONC_M7 != 0)) +
   geom_point (aes(x=PRED, y=CONC_M7),  colour='darkblue', size = 0.4) +
   geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
-  xlab('PRED') +
-  ylab('OBS') +
+  labs(title = "Linear Elimination",
+       y = "Observed Concentration",
+       x = "Predicted Concentration") +
+  xlim(0, 200) +
   theme_minimal()
+p2 <- ggplot(dat2 %>% filter(CONC_M7 != 0)) +
+  geom_point (aes(x=PRED, y=CONC_M7),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  labs(title = "TMDD (MM Approximation)",
+       y = "Observed Concentration",
+       x = "Predicted Concentration") +
+  xlim(0,200) +
+  theme_minimal()
+p1_2 <- p1+p2 + patchwork::plot_annotation(title = "Population Predicted versus Observed Concentrations in Two-Compartment Models")
+
+ggsave("PRED_OBS.png", plot = p1_2, width = 8, height = 5, units = "in")
 ```
 
 # Logaritmic scale Population Prediction (PRED) vs OBS
 
 ```{r}
-ggplot(dat %>% filter(CONC_M7 != 0)) +
+p11 <- ggplot(dat %>% filter(CONC_M7 != 0)) +
   geom_point (aes(x=log10(PRED), y=log10(CONC_M7)),  colour='darkblue', size = 0.4) +
   geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
-  xlab('PRED') +
-  ylab('OBS') +
+  labs(title = "Linear Elimination",
+       y = "Observed Concentration",
+       x = "Predicted Concentration") +
   theme_minimal()
+p12 <- ggplot(dat2 %>% filter(CONC_M7 != 0)) +
+  geom_point (aes(x=log10(PRED), y=log10(CONC_M7)),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  labs(title = "TMDD (MM Approximation)",
+       y = "Observed Concentration",
+       x = "Predicted Concentration") +
+  theme_minimal()
+p11_12 <- p11 + p12 + patchwork::plot_annotation(title = "Log-Scaled Population Predicted versus Observed Concentrations in Two-Compartment Models")
+
+ggsave("PRED_OBS_log.png", plot = p11_12, width = 9, height = 5, units = "in")
 ```
 
 # CWRES vs PRED
 
 ```{r}
-ggplot(dat) + # CWRES used because of FOCE-I
+p3 <- ggplot(dat) + # CWRES used because of FOCE-I
   geom_point (aes(x=PRED, y=CWRES),  colour='darkblue', size = 0.4) +
   geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
   geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
   geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
-  xlab('PRED') +
-  ylab('CWRES') +
+  labs(title = "Linear Elimination",
+       y = "Condtional Weighed Residuals",
+       x = "Predicted Concentration") +
+  xlim(0,300)+
+  ylim(-4,7) + 
   theme_minimal()
+p4 <- ggplot(dat2) + # CWRES used because of FOCE-I
+  geom_point (aes(x=PRED, y=CWRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  labs(title = "TMDD (MM Approximation)",
+       y = "Condtional Weighed Residuals",
+       x = "Predicted Concentration") +
+  xlim(0,300)+
+  ylim(-4,7) + 
+  theme_minimal()
+p3_4 <- p3 + p4 + patchwork::plot_annotation(title = "Conditional Weighed Residuals versus Population Predicted Concentrations in Two-Compartment Models")
+ggsave("PRED_CWRES_PRED.png", plot = p3_4, width = 9.3, height = 5, units = "in")
 ```
 
 # PRED vs RES
 
 ```{r}
-ggplot(dat) +
+p5 <- ggplot(dat) +
   geom_point (aes(x=PRED, y=RES),  colour='darkblue', size = 0.4) +
   geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
   geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
   geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
-  xlab('PRED') +
-  ylab('RES') +
+  labs(title = "Linear Elimination",
+       y = "Population Residuals",
+       x = "Predicted Concentration") +
+    xlim(0,300) +
+  ylim(-200,400) +
   theme_minimal()
+p6 <- ggplot(dat2) +
+  geom_point (aes(x=PRED, y=RES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  labs(title = "TMDD (MM Approximation)",
+       y = "Population Residuals",
+       x = "Predicted Concentration") +
+  xlim(0,300) +
+  ylim(-200,400) +
+  theme_minimal()
+p5_6 <- p5+p6 + patchwork::plot_annotation(title = "Population Residuals versus Population Predicted Concentrations in Two-Compartment Models")
+ggsave("PRED_RES_PRED.png", plot = p5_6, width = 9.3, height = 5, units = "in")
 ```
 
 # PRED vs CRES
 
 ```{r}
-ggplot(dat) + # CRES used because of FOCE-I
+p7 <- ggplot(dat) + # CRES used because of FOCE-I
   geom_point (aes(x=PRED, y=CRES),  colour='darkblue', size = 0.4) +
   geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
   geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
   geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
-  xlab('PRED') +
-  ylab('CRES') +
+  labs(title = "Linear Elimination",
+       y = "Conditional Population Residuals",
+       x = "Predicted Concentration") +
+    xlim(0,200) + 
+  ylim(-100,500) +
   theme_minimal()
+p8 <- ggplot(dat2) + # CRES used because of FOCE-I
+  geom_point (aes(x=PRED, y=CRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  labs(title = "TMDD (MM Approximation)",
+       y = "Conditional Population Residuals",
+       x = "Predicted Concentration") +
+  xlim(0,200) + 
+  ylim(-100,500) +
+  theme_minimal()
+p7_8 <- p7+p8 + patchwork::plot_annotation(title = "Conditional Population Residuals versus Population Predicted Concentrations in Two-Compartment Models")
+ggsave("PRED_CRES_PRED.png", plot = p7_8, width = 9.6, height = 5, units = "in")
 ```
-
 
 # CWRES vs Time after Dose
 
 ```{r}
-ggplot(dat %>% filter(CWRES != 0)) + # CWRES used because of FOCE-I
+p9 <- ggplot(dat %>% filter(CWRES != 0)) + # CWRES used because of FOCE-I
   geom_point (aes(x=TAD, y=CWRES),  colour='darkblue', size = 0.4) +
   geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
   geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
   geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
-  xlab('Time after dose') +
-  ylab('CWRES') +
+  labs(title = "Linear Elimination",
+       y = "Conditional Weighed Residuals",
+       x = "Time After Dose (days)") +
+    ylim(-3,5) +
   theme_minimal()
-
+p10 <- ggplot(dat2 %>% filter(CWRES != 0)) + # CWRES used because of FOCE-I
+  geom_point (aes(x=TAD, y=CWRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  labs(title = "TMDD (MM Approximation)",
+       y = "Conditional Weighed Residuals",
+       x = "Time After Dose (days)") +
+  ylim(-3,5) +
+  theme_minimal()
+p9_10 <- p9 + p10 + patchwork::plot_annotation(title = "Conditional Weighed Residuals versus Time After Dose in Two-Compartment Models")
+ggsave("PRED_CWRES_TAD.png", plot = p9_10, width = 8, height = 5, units = "in")
 ```

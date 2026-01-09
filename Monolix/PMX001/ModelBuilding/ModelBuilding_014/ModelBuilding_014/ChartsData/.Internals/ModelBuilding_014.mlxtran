@@ -1,0 +1,100 @@
+<DATAFILE>
+
+[FILEINFO]
+file={path='../../../../../../dataset_mlx.csv'}
+delimiter = comma
+header={DUMMY, ID, TIME, WEEK, DOSE, RATE, CONC, ADA, BW, ALB, SEX, AGE, CREAT, COL, EVID, BLQ, LIMIT, CONC_M7}
+
+[CONTENT]
+ID = {use=identifier}
+TIME = {use=time}
+DOSE = {use=amount}
+RATE = {use=rate}
+CONC = {use=observation, type=continuous}
+ADA = {use=covariate, type=categorical}
+BW = {use=covariate, type=continuous}
+ALB = {use=covariate, type=continuous}
+SEX = {use=covariate, type=categorical}
+AGE = {use=covariate, type=continuous}
+CREAT = {use=covariate, type=continuous}
+COL = {use=covariate, type=categorical}
+EVID = {use=eventidentifier}
+BLQ = {use=censored}
+LIMIT = {use=limit}
+
+<MODEL>
+
+[COVARIATE]
+input = {ALB, AGE, BW, CREAT, SEX, ADA}
+
+SEX = {type=categorical, categories={'0', '1'}}
+ADA = {type=categorical, categories={'1', 'NA'}}
+
+[INDIVIDUAL]
+input = {Cl_pop, Q_pop, V2_pop, V_pop, omega_V, Km_pop, Vm_pop, omega_Cl, ALB, beta_Cl_ALB, ADA, beta_Cl_ADA_NA, CREAT, beta_Km_CREAT}
+
+ADA = {type=categorical, categories={'1', 'NA'}}
+
+DEFINITION:
+Cl = {distribution=logNormal, typical=Cl_pop, covariate={ALB, ADA}, coefficient={beta_Cl_ALB, {0, beta_Cl_ADA_NA}}, sd=omega_Cl}
+Q = {distribution=logNormal, typical=Q_pop, no-variability}
+V2 = {distribution=logNormal, typical=V2_pop, no-variability}
+V = {distribution=logNormal, typical=V_pop, sd=omega_V}
+Km = {distribution=logNormal, typical=Km_pop, covariate=CREAT, coefficient=beta_Km_CREAT, no-variability}
+Vm = {distribution=logNormal, typical=Vm_pop, no-variability}
+
+[LONGITUDINAL]
+input = {a, b}
+
+file = 'lib:infusion_2cpt_MM_VVmKmClQV2_outputL.txt'
+
+DEFINITION:
+CONC = {distribution=logNormal, prediction=L, errorModel=combined1(a, b)}
+
+<FIT>
+data = 'CONC'
+model = CONC
+
+<PARAMETER>
+Cl_pop = {value=1.239, method=MLE}
+Km_pop = {value=5100, method=MLE}
+Q_pop = {value=0.6899999999999999, method=MLE}
+V2_pop = {value=2.849, method=MLE}
+V_pop = {value=3.147, method=MLE}
+Vm_pop = {value=2.056, method=MLE}
+a = {value=1, method=MLE}
+b = {value=0.3, method=MLE}
+beta_Cl_ADA_NA = {value=0, method=MLE}
+beta_Cl_ALB = {value=0, method=MLE}
+beta_Km_CREAT = {value=0, method=MLE}
+c = {value=1, method=FIXED}
+omega_Cl = {value=1, method=MLE}
+omega_V = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = {conditionalMean, conditionalMode })
+fim(run = false,method = Linearization)
+logLikelihood(method = Linearization)
+
+[PLOTS]
+run = false
+plots = {indfits = {selected = true}, parameterdistribution = {selected = true}, obspred = {selected = true}, covariancemodeldiagnosis = {selected = true}, covariatemodeldiagnosis = {selected = true}, vpc = {selected = true}, residualsscatter = {selected = true}, residualsdistribution = {selected = true}, randomeffects = {selected = true}, blq = {selected = true}, saemresults = {selected = true}}
+
+[SETTINGS]
+GLOBAL:
+exportpath = '../../'
+nbsimulations = 2000
+
+POPULATION:
+exploratoryiterations = 2000
+simulatedannealingiterations = 2000
+
+INDIVIDUAL:
+optimizationiterations = 10000
+
+FIM:
+maxiterations = 2000
+

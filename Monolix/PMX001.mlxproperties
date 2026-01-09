@@ -1,13 +1,15 @@
 [PROPERTIES]
-outputplot%3ACONC_M7%3A0\censObservations=false
-outputplot%3ACONC_M7%3A0\obsLines=false
-outputplot%3ACONC_M7%3A0\obsMean=true
-outputplot%3ACONC_M7%3A0\yLog=true
-vpc%3ACONC_M7%3A0\xInterval=0.035646468346, 45
-vpc%3ACONC_M7%3A0\yInterval=1, 251.905790224
+covariateviewer%3A%3A0\colSelection=AGE, ALB, BW, CREAT, ADA, SEX
+covariateviewer%3A%3A0\information=true
+covariateviewer%3A%3A0\rowSelection=AGE, ALB, BW, CREAT
+outputplot%3ACONC%3A0\obsLines=false
+outputplot%3ACONC%3A0\obsMean=true
+outputplot%3ACONC%3A0\yLog=true
+vpc%3ACONC%3A0\yLog=true
 
 [SETTINGS]
-outputplot%3ACONC_M7%3A0\fixedNbBins=14
-outputplot%3ACONC_M7%3A0\isNumberOfBinsFixed=true
-outputplot%3ACONC_M7%3A0\timeAfterLastDose=true
-vpc%3ACONC_M7%3A0\timeAfterLastDose=true
+outputplot%3ACONC%3A0\fixedNbBins=14
+outputplot%3ACONC%3A0\isNumberOfBinsFixed=true
+outputplot%3ACONC%3A0\timeAfterLastDose=true
+outputplot%3ACONC%3A0\useCensoredData=true
+vpc%3ACONC%3A0\timeAfterLastDose=true

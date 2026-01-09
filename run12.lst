@@ -1,6 +1,6 @@
-wo 07 jan 2026 21:31:04 CET
+do 08 jan 2026 22:01:54 CET
 ;; 1. Based on: run09
-;; 2. Description: PMX001 2CMT LINEAR M7+ (COV MODEL)
+;; 2. Description: PMX001 2CMT LINEAR M7+ (FINAL MODEL)
 ;; Joshua I., Ali K.
 ;; 2025-12-09
 $PROBLEM    PMX001 Two Compartment
@@ -10,9 +10,10 @@ $DATA      dataset_clean.csv IGNORE=@
 $ABBREVIATED DERIV2=NO
 $SUBROUTINE ADVAN13 ; general nonlinear model
             TOL=5 ; tolerance for $DES,higher TOL: more accurate,but slower computation
-$MODEL      NCOMP=2 ; number of compartments
+$MODEL      NCOMP=3 ; number of compartments
             COMP=(DOSE,DEFDOSE,DEFOBS) ; first (central) compartment
             COMP=(PERIPH) ; second (peripheral) compartment
+            COMP=(AUC) ; continuous AUC integration
 $PK
 IF (EVID.EQ.1) LASTDOSE = TIME
 TAD = TIME - LASTDOSE
@@ -47,7 +48,9 @@ $THETA  (0.001,1.41,3) ; [1]   CL (L/d)
  ; values are determined in 3 iterations
 $DES DADT(1) = -K10*A(1) -K12*A(1) +K21*A(2) ; ODE for central    compartment
      DADT(2) =            K12*A(1) -K21*A(2) ; ODE for peripheral compartment
-     
+        cAUC = A(1)/V1                       ; calculates cumulative AUC
+     DADT(3) = cAUC                          ; continuous AUC integration
+
 $ERROR
 IPRED = F
 LLOQ = 1  ; (mg/L)
@@ -77,10 +80,10 @@ $ESTIMATION METHOD=1 INTERACTION ; FOCE-I
             MAXEVAL=9999 SIG=3 PRINT=5
 $COVARIANCE PRINT=E UNCONDITIONAL MATRIX=S
  ; output table for standard outcomes
-$TABLE      ID TIME TAD DV EVID PRED IPRED WRES IWRES RES IRES CWRES
-            CRES NOPRINT ONEHEADER FILE=run12_sdtab
+$TABLE      ID TIME TAD DV cAUC EVID PRED IPRED WRES IWRES RES IRES
+            CWRES CRES NOPRINT ONEHEADER FILE=run12_sdtab
  ; output table for PK parameters
-$TABLE      ID CL V1 V2 Q K10 K12 K21 NOPRINT NOAPPEND ONEHEADER
+$TABLE      ID cAUC CL V1 V2 Q K10 K12 K21 NOPRINT NOAPPEND ONEHEADER
             FILE=run12_patab
  ; output table for categorical covariates
 $TABLE      ID ADA SEX COL NOPRINT NOAPPEND ONEHEADER FILE=run12_catab
@@ -88,8 +91,8 @@ $TABLE      ID ADA SEX COL NOPRINT NOAPPEND ONEHEADER FILE=run12_catab
 $TABLE      ID BW ALB AGE CREAT NOPRINT NOAPPEND ONEHEADER
             FILE=run12_cotab
  ; output table for parameters and covariates
-$TABLE      ID CL V1 V2 Q K10 K12 K21 ADA SEX COL BW ALB AGE CREAT
-            NOPRINT NOAPPEND ONEHEADER FILE=run12_pa_cov
+$TABLE      ID cAUC CL V1 V2 Q K10 K12 K21 ADA SEX COL BW ALB AGE
+            CREAT NOPRINT NOAPPEND ONEHEADER FILE=run12_pa_cov
 ;; REFERENCES
 
 ;; 1) https://www.ncbi.nlm.nih.gov/books/NBK557889/
@@ -105,6 +108,11 @@ NM-TRAN MESSAGES
              
  (WARNING  2) NM-TRAN INFERS THAT THE DATA ARE POPULATION.
              
+ (WARNING  48) DES-DEFINED ITEMS ARE COMPUTED ONLY WHEN EVENT TIME
+ INCREASES. E.G., DISPLAYED VALUES ASSOCIATED WITH THE FIRST EVENT RECORD
+ OF AN INDIVIDUAL RECORD ARE COMPUTED WITH (THE LAST ADVANCE TO) AN EVENT
+ TIME OF THE PRIOR INDIVIDUAL RECORD.
+             
  (WARNING  79) SIGMA IS USED ON THE RIGHT. WITH A SUBSEQUENT RUN, IF AN
  INITIAL ESTIMATE OF A DIAGONAL BLOCK OF SIGMA IS TO BE COMPUTED BY
  NONMEM, THAT BLOCK WILL BE SET TO AN IDENTITY MATRIX DURING THAT
@@ -115,8 +123,8 @@ NM-TRAN MESSAGES
 
 License Registered to: Erwin DREESEN KU Leuven
 Expiration Date:    25 JAN 2026
-Current Date:        7 JAN 2026
-  **** WARNING!!! Days until program expires :  18 ****
+Current Date:        8 JAN 2026
+  **** WARNING!!! Days until program expires :  17 ****
   **** CONTACT idssoftware@iconplc.com FOR RENEWAL ****
 1NONLINEAR MIXED EFFECTS MODEL PROGRAM (NONMEM) VERSION 7.6.0 (nm760)
  ORIGINALLY DEVELOPED BY STUART BEAL, LEWIS SHEINER, AND ALISON BOECKMANN
@@ -140,7 +148,7 @@ Current Date:        7 JAN 2026
 0LABELS FOR DATA ITEMS:
  ID TIME WEEK DOSE RATE ADA BW ALB SEX AGE CREAT COL EVID BLQ CONC_M7 MDV
 0(NONBLANK) LABELS FOR PRED-DEFINED ITEMS:
- TAD CL V1 V2 Q K10 K12 K21 IPRED IRES IWRES
+ TAD CL V1 V2 Q K10 K12 K21 cAUC IPRED IRES IWRES
 0FORMAT FOR DATA:
  (3(4E19.0/),3E19.0,1F2.0)
 
@@ -212,7 +220,7 @@ Current Date:        7 JAN 2026
  RFORMAT:
  FIXED_EFFECT_ETAS:
 0USER-CHOSEN ITEMS:
- ID TIME TAD CONC_M7 EVID IPRED IWRES IRES CWRES CRES
+ ID TIME TAD CONC_M7 cAUC EVID IPRED IWRES IRES CWRES CRES
 0-- TABLE   2 --
 0RECORDS ONLY:    ALL
 04 COLUMNS APPENDED:    NO
@@ -225,7 +233,7 @@ Current Date:        7 JAN 2026
  RFORMAT:
  FIXED_EFFECT_ETAS:
 0USER-CHOSEN ITEMS:
- ID CL V1 V2 Q K10 K12 K21
+ ID cAUC CL V1 V2 Q K10 K12 K21
 0-- TABLE   3 --
 0RECORDS ONLY:    ALL
 04 COLUMNS APPENDED:    NO
@@ -264,18 +272,19 @@ Current Date:        7 JAN 2026
  RFORMAT:
  FIXED_EFFECT_ETAS:
 0USER-CHOSEN ITEMS:
- ID CL V1 V2 Q K10 K12 K21 ADA SEX COL BW ALB AGE CREAT
+ ID cAUC CL V1 V2 Q K10 K12 K21 ADA SEX COL BW ALB AGE CREAT
 1DOUBLE PRECISION PREDPP VERSION 7.6.0 (nm760)
 
  GENERAL NONLINEAR KINETICS MODEL WITH STIFF/NONSTIFF EQUATIONS (LSODA, ADVAN13)
 0MODEL SUBROUTINE USER-SUPPLIED - ID NO. 9999
-0MAXIMUM NO. OF BASIC PK PARAMETERS:   3
+0MAXIMUM NO. OF BASIC PK PARAMETERS:   4
 0COMPARTMENT ATTRIBUTES
  COMPT. NO.   FUNCTION   INITIAL    ON/OFF      DOSE      DEFAULT    DEFAULT
                          STATUS     ALLOWED    ALLOWED    FOR DOSE   FOR OBS.
     1         DOSE         ON         YES        YES        YES        YES
     2         PERIPH       ON         YES        YES        NO         NO
-    3         OUTPUT       OFF        YES        NO         NO         NO
+    3         AUC          ON         YES        YES        NO         NO
+    4         OUTPUT       OFF        YES        NO         NO         NO
  INITIAL (BASE) TOLERANCE SETTINGS:
  NRD (RELATIVE) VALUE(S) OF TOLERANCE:   5
  ANRD (ABSOLUTE) VALUE(S) OF TOLERANCE:  12
@@ -284,9 +293,10 @@ Current Date:        7 JAN 2026
  COMPT. NO.                             INDICES
               SCALE      BIOAVAIL.   ZERO-ORDER  ZERO-ORDER  ABSORB
                          FRACTION    RATE        DURATION    LAG
-    1            4           *           *           *           *
-    2            5           *           *           *           *
-    3            *           -           -           -           -
+    1            5           *           *           *           *
+    2            6           *           *           *           *
+    3            *           *           *           *           *
+    4            *           -           -           -           -
              - PARAMETER IS NOT ALLOWED FOR THIS MODEL
              * PARAMETER IS NOT SUPPLIED BY PK SUBROUTINE;
                WILL DEFAULT TO ONE IF APPLICABLE
@@ -368,62 +378,74 @@ Current Date:        7 JAN 2026
  MONITORING OF SEARCH:
 
 
-0ITERATION NO.:    0    OBJECTIVE VALUE:   10624.1638404629        NO. OF FUNC. EVALS.:   9
+0ITERATION NO.:    0    OBJECTIVE VALUE:   10624.1663487294        NO. OF FUNC. EVALS.:   9
  CUMULATIVE NO. OF FUNC. EVALS.:        9
  NPARAMETR:  1.4100E+00  4.7300E+00  2.3100E-01  2.1500E+00  5.7800E+00 -1.2700E-01  6.0800E-01  3.7500E-01  2.8900E-01
  PARAMETER:  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01  1.0000E-01
- GRADIENT:   5.8918E+01  4.3660E+01  4.2815E+01  6.0177E+01 -6.3416E-01  3.5875E+01  2.6846E+00 -1.6708E+00 -3.4374E-01
+ GRADIENT:   4.4992E+01  4.1711E+01  3.6924E+01  4.5509E+01 -6.3563E-01  3.8351E+01  2.6853E+00 -1.6524E+00 -4.7420E-01
 
-0ITERATION NO.:    5    OBJECTIVE VALUE:   10624.1552907610        NO. OF FUNC. EVALS.:  81
- CUMULATIVE NO. OF FUNC. EVALS.:       90
- NPARAMETR:  1.3973E+00  4.7066E+00  2.2876E-01  2.1274E+00  5.7803E+00 -1.2714E-01  6.0705E-01  3.7538E-01  2.8902E-01
- PARAMETER:  8.2930E-02  8.4811E-02  8.5858E-02  8.1529E-02  1.0018E-01  8.8370E-02  9.9216E-02  1.0050E-01  1.0004E-01
- GRADIENT:  -5.2297E-01 -2.4994E+00 -1.4214E+01  1.3667E+01 -6.1574E-01  3.0884E-01  2.3929E+00 -1.7062E+00  2.3620E-01
+0ITERATION NO.:    5    OBJECTIVE VALUE:   10624.1417318329        NO. OF FUNC. EVALS.: 111
+ CUMULATIVE NO. OF FUNC. EVALS.:      120
+ NPARAMETR:  1.3890E+00  4.7162E+00  2.2656E-01  2.1171E+00  5.7852E+00 -1.2739E-01  5.9428E-01  3.8150E-01  2.8967E-01
+ PARAMETER:  7.1820E-02  9.0987E-02  7.1918E-02  7.3067E-02  1.0322E-01  6.6557E-02  8.8586E-02  1.0859E-01  1.0116E-01
+ GRADIENT:   1.8038E+00 -1.8364E+00 -2.8909E+00  3.5400E-01 -5.6087E-01  1.0864E+01 -8.2619E-01  3.2201E-01  6.3052E+00
 
-0ITERATION NO.:    6    OBJECTIVE VALUE:   10624.1552907610        NO. OF FUNC. EVALS.:  26
- CUMULATIVE NO. OF FUNC. EVALS.:      116
- NPARAMETR:  1.3973E+00  4.7066E+00  2.2876E-01  2.1274E+00  5.7803E+00 -1.2714E-01  6.0705E-01  3.7538E-01  2.8902E-01
- PARAMETER:  8.2930E-02  8.4811E-02  8.5858E-02  8.1529E-02  1.0018E-01  8.8370E-02  9.9216E-02  1.0050E-01  1.0004E-01
- GRADIENT:   2.3278E+01  1.5687E+01  2.9068E+01 -3.3156E+01 -7.0473E-01  1.3220E+01 -1.1279E+01 -1.0901E+01  1.7288E+01
+0ITERATION NO.:   10    OBJECTIVE VALUE:   10624.1355850281        NO. OF FUNC. EVALS.: 131
+ CUMULATIVE NO. OF FUNC. EVALS.:      251
+ NPARAMETR:  1.3889E+00  4.7169E+00  2.2631E-01  2.1166E+00  5.7864E+00 -1.2740E-01  5.9320E-01  3.8178E-01  2.8937E-01
+ PARAMETER:  7.1779E-02  9.1503E-02  7.0368E-02  7.2715E-02  1.0402E-01  6.5243E-02  8.7681E-02  1.0896E-01  1.0065E-01
+ GRADIENT:   4.1116E+01  3.7918E+01  3.6020E+01  4.1745E+01 -5.2778E-01  3.0913E+01 -1.1237E+00  3.8662E-01  4.4520E+00
+
+0ITERATION NO.:   14    OBJECTIVE VALUE:   10624.1311628695        NO. OF FUNC. EVALS.: 106
+ CUMULATIVE NO. OF FUNC. EVALS.:      357
+ NPARAMETR:  1.3889E+00  4.7169E+00  2.2632E-01  2.1166E+00  5.7875E+00 -1.2740E-01  5.9320E-01  3.8171E-01  2.8937E-01
+ PARAMETER:  7.1750E-02  9.1467E-02  7.0377E-02  7.2660E-02  1.0457E-01  6.5226E-02  8.7680E-02  1.0889E-01  1.0064E-01
+ GRADIENT:  -9.6381E-01  2.4888E+01  2.5442E+01 -1.9256E+01 -1.0368E-01 -2.9131E+01 -1.1719E+00  3.8601E-01  2.3429E+01
 
  #TERM:
-0MINIMIZATION SUCCESSFUL
- HOWEVER, PROBLEMS OCCURRED WITH THE MINIMIZATION.
- REGARD THE RESULTS OF THE ESTIMATION STEP CAREFULLY, AND ACCEPT THEM ONLY
- AFTER CHECKING THAT THE COVARIANCE STEP PRODUCES REASONABLE OUTPUT.
- NO. OF FUNCTION EVALUATIONS USED:      116
- NO. OF SIG. DIGITS IN FINAL EST.:  3.2
+0MINIMIZATION TERMINATED
+ DUE TO PROXIMITY OF LAST ITERATION EST. TO A VALUE
+ AT WHICH THE OBJ. FUNC. IS INFINITE (ERROR=136)
+0AT THE LAST COMPUTED INFINITE VALUE OF THE OBJ. FUNCT.:
+ ERROR IN NCONTR WITH INDIVIDUAL      35   ID= 3.50000000000000E+01
+ NUMERICAL HESSIAN OF OBJ. FUNC. FOR COMPUTING CONDITIONAL ESTIMATE
+ IS NON POSITIVE DEFINITE
+ THETA=
+  1.39E+00   4.72E+00   2.26E-01   2.12E+00   5.79E+00  -1.27E-01
+
+ NO. OF FUNCTION EVALUATIONS USED:      357
+ NO. OF SIG. DIGITS UNREPORTABLE
 
  ETABAR IS THE ARITHMETIC MEAN OF THE ETA-ESTIMATES,
  AND THE P-VALUE IS GIVEN FOR THE NULL HYPOTHESIS THAT THE TRUE MEAN IS 0.
 
- ETABAR:         1.0388E-02  6.9005E-03
- SE:             8.8828E-02  7.0504E-02
+ ETABAR:         1.6249E-02  5.4916E-03
+ SE:             8.8838E-02  7.0611E-02
  N:                      75          75
 
- P VAL.:         9.0690E-01  9.2203E-01
+ P VAL.:         8.5487E-01  9.3801E-01
 
- ETASHRINKSD(%)  1.2560E+00  3.3604E-01
- ETASHRINKVR(%)  2.4963E+00  6.7094E-01
- EBVSHRINKSD(%)  4.2983E-01  9.8000E-01
- EBVSHRINKVR(%)  8.5781E-01  1.9504E+00
- RELATIVEINF(%)  9.9127E+01  9.8034E+01
- EPSSHRINKSD(%)  3.6693E+00  3.6693E+00
- EPSSHRINKVR(%)  7.2040E+00  7.2040E+00
+ ETASHRINKSD(%)  8.6800E-02  1.0204E+00
+ ETASHRINKVR(%)  1.7352E-01  2.0304E+00
+ EBVSHRINKSD(%)  4.4040E-01  9.6363E-01
+ EBVSHRINKVR(%)  8.7885E-01  1.9180E+00
+ RELATIVEINF(%)  9.9106E+01  9.8067E+01
+ EPSSHRINKSD(%)  3.7056E+00  3.7056E+00
+ EPSSHRINKVR(%)  7.2738E+00  7.2738E+00
 
   
  TOTAL DATA POINTS NORMALLY DISTRIBUTED (N):         2801
  N*LOG(2PI) CONSTANT TO OBJECTIVE FUNCTION:    5147.8936630125763     
- OBJECTIVE FUNCTION VALUE WITHOUT CONSTANT:    10624.155290760960     
- OBJECTIVE FUNCTION VALUE WITH CONSTANT:       15772.048953773538     
+ OBJECTIVE FUNCTION VALUE WITHOUT CONSTANT:    10624.131162869506     
+ OBJECTIVE FUNCTION VALUE WITH CONSTANT:       15772.024825882083     
  REPORTED OBJECTIVE FUNCTION DOES NOT CONTAIN CONSTANT
   
  TOTAL EFFECTIVE ETAS (NIND*NETA):                           150
   
  #TERE:
- Elapsed estimation  time in seconds:   238.82
- Elapsed covariance  time in seconds:    53.91
- Elapsed postprocess time in seconds:     3.73
+ Elapsed estimation  time in seconds:  1193.20
+ Elapsed covariance  time in seconds:    99.67
+ Elapsed postprocess time in seconds:     6.79
 1
  
  
@@ -457,7 +479,7 @@ Current Date:        7 JAN 2026
 
 
 
- #OBJV:********************************************         10624.155       *********************************************
+ #OBJV:********************************************         10624.131       *********************************************
 1
  ************************************************************************************************************************
  ********************                                                                                ********************
@@ -473,7 +495,7 @@ Current Date:        7 JAN 2026
 
          TH 1      TH 2      TH 3      TH 4      TH 5      TH 6     
  
-         1.40E+00  4.71E+00  2.29E-01  2.13E+00  5.78E+00 -1.27E-01
+         1.39E+00  4.72E+00  2.26E-01  2.12E+00  5.79E+00 -1.27E-01
  
 
 
@@ -483,10 +505,10 @@ Current Date:        7 JAN 2026
          ETA1      ETA2     
  
  ETA1
-+        6.07E-01
++        5.93E-01
  
  ETA2
-+        0.00E+00  3.75E-01
++        0.00E+00  3.82E-01
  
 
 
@@ -510,10 +532,10 @@ Current Date:        7 JAN 2026
          ETA1      ETA2     
  
  ETA1
-+        7.79E-01
++        7.70E-01
  
  ETA2
-+        0.00E+00  6.13E-01
++        0.00E+00  6.18E-01
  
 
 
@@ -543,7 +565,7 @@ Current Date:        7 JAN 2026
 
          TH 1      TH 2      TH 3      TH 4      TH 5      TH 6     
  
-         4.56E-02  1.68E-01  1.88E-02  1.26E-01  2.44E-01  9.99E-04
+         6.81E-02  1.99E-01  1.27E-02  9.83E-02  2.38E-01  1.11E-03
  
 
 
@@ -553,10 +575,10 @@ Current Date:        7 JAN 2026
          ETA1      ETA2     
  
  ETA1
-+        1.61E-01
++        1.56E-01
  
  ETA2
-+       .........  7.54E-02
++       .........  7.61E-02
  
 
 
@@ -566,7 +588,7 @@ Current Date:        7 JAN 2026
          EPS1      EPS2     
  
  EPS1
-+        1.17E-02
++        1.21E-02
  
  EPS2
 +       ......... .........
@@ -580,10 +602,10 @@ Current Date:        7 JAN 2026
          ETA1      ETA2     
  
  ETA1
-+        1.03E-01
++        1.01E-01
  
  ETA2
-+       .........  6.15E-02
++       .........  6.16E-02
  
 
 
@@ -593,7 +615,7 @@ Current Date:        7 JAN 2026
          EPS1      EPS2     
  
  EPS1
-+        1.09E-02
++        1.12E-02
  
  EPS2
 +       ......... .........
@@ -611,34 +633,34 @@ Current Date:        7 JAN 2026
 
  
  TH 1
-+        2.08E-03
++        4.64E-03
  
  TH 2
-+       -1.61E-03  2.81E-02
++        3.53E-03  3.97E-02
  
  TH 3
-+       -6.12E-06  3.42E-04  3.53E-04
++        3.66E-04  3.35E-04  1.62E-04
  
  TH 4
-+        1.60E-04 -4.83E-04  1.52E-03  1.58E-02
++       -9.10E-04  7.68E-03 -2.57E-05  9.67E-03
  
  TH 5
-+       -1.14E-03  1.31E-03  2.55E-04  2.24E-05  5.94E-02
++       -1.04E-03 -2.50E-03  1.52E-04 -1.32E-03  5.68E-02
  
  TH 6
-+        3.05E-06 -4.50E-05 -7.59E-06 -1.44E-05 -7.21E-06  9.98E-07
++        2.66E-05 -1.04E-05  7.25E-06 -1.85E-05  3.26E-06  1.23E-06
  
  OM11
-+        9.77E-04  3.63E-03 -3.29E-04 -1.90E-04 -4.84E-03 -1.63E-05  2.59E-02
++        1.07E-03  5.22E-03 -1.53E-04  1.91E-03 -4.61E-03 -3.23E-05  2.42E-02
  
  OM12
 +       ......... ......... ......... ......... ......... ......... ......... .........
  
  OM22
-+       -5.21E-05 -1.01E-03  2.16E-05 -8.72E-04  5.03E-04 -1.88E-05 -3.23E-03 .........  5.69E-03
++        9.25E-06 -2.48E-03 -5.03E-05 -6.39E-04  3.66E-04 -1.31E-05 -3.15E-03 .........  5.80E-03
  
  SG11
-+       -7.95E-05  1.95E-04  9.17E-06 -8.71E-05  6.37E-04 -4.72E-07 -7.53E-04 .........  8.67E-06  1.38E-04
++        6.12E-05  5.24E-05  3.03E-05 -1.94E-04  6.23E-04  5.12E-07 -7.60E-04 .........  1.89E-05  1.45E-04
  
  SG12
 +       ......... ......... ......... ......... ......... ......... ......... ......... ......... ......... .........
@@ -659,34 +681,34 @@ Current Date:        7 JAN 2026
 
  
  TH 1
-+        4.56E-02
++        6.81E-02
  
  TH 2
-+       -2.10E-01  1.68E-01
++        2.60E-01  1.99E-01
  
  TH 3
-+       -7.14E-03  1.09E-01  1.88E-02
++        4.22E-01  1.32E-01  1.27E-02
  
  TH 4
-+        2.79E-02 -2.29E-02  6.43E-01  1.26E-01
++       -1.36E-01  3.92E-01 -2.06E-02  9.83E-02
  
  TH 5
-+       -1.03E-01  3.20E-02  5.56E-02  7.31E-04  2.44E-01
++       -6.39E-02 -5.28E-02  5.03E-02 -5.63E-02  2.38E-01
  
  TH 6
-+        6.68E-02 -2.69E-01 -4.05E-01 -1.15E-01 -2.96E-02  9.99E-04
++        3.53E-01 -4.71E-02  5.15E-01 -1.70E-01  1.23E-02  1.11E-03
  
  OM11
-+        1.33E-01  1.35E-01 -1.09E-01 -9.38E-03 -1.23E-01 -1.02E-01  1.61E-01
++        1.01E-01  1.68E-01 -7.75E-02  1.25E-01 -1.24E-01 -1.88E-01  1.56E-01
  
  OM12
 +       ......... ......... ......... ......... ......... ......... ......... .........
  
  OM22
-+       -1.52E-02 -7.95E-02  1.53E-02 -9.20E-02  2.73E-02 -2.50E-01 -2.66E-01 .........  7.54E-02
++        1.78E-03 -1.63E-01 -5.20E-02 -8.53E-02  2.02E-02 -1.56E-01 -2.66E-01 .........  7.61E-02
  
  SG11
-+       -1.49E-01  9.92E-02  4.16E-02 -5.91E-02  2.23E-01 -4.03E-02 -3.99E-01 .........  9.80E-03  1.17E-02
++        7.46E-02  2.18E-02  1.98E-01 -1.63E-01  2.17E-01  3.84E-02 -4.05E-01 .........  2.06E-02  1.21E-02
  
  SG12
 +       ......... ......... ......... ......... ......... ......... ......... ......... ......... ......... .........
@@ -707,34 +729,34 @@ Current Date:        7 JAN 2026
 
  
  TH 1
-+        5.24E+02
++        3.25E+02
  
  TH 2
-+        3.07E+01  4.24E+01
++       -3.41E+01  3.57E+01
  
  TH 3
-+       -8.76E+01 -3.63E+01  6.30E+03
++       -4.52E+02 -2.86E+01  9.92E+03
  
  TH 4
-+        2.90E+00  6.10E+00 -5.59E+02  1.16E+02
++        4.81E+01 -2.97E+01 -1.32E+02  1.38E+02
  
  TH 5
-+        6.66E+00  9.87E-02 -1.45E+01  8.17E-01  1.79E+01
++        6.33E+00  5.73E-01 -1.73E+01  9.48E-01  1.87E+01
  
  TH 6
-+       -1.23E+03  1.68E+03  4.22E+04 -2.16E+03 -2.85E+01  1.53E+06
++       -5.12E+03  8.42E+02 -5.22E+04  1.58E+03 -2.66E+01  1.38E+06
  
  OM11
-+       -2.23E+01 -7.21E+00  1.23E+02 -5.27E+00  5.98E-01  2.38E+03  5.70E+01
++       -2.83E+01 -2.91E+00 -4.72E+01  1.79E+00  5.02E-01  2.79E+03  6.19E+01
  
  OM12
 +       ......... ......... ......... ......... ......... ......... ......... .........
  
  OM22
-+       -6.47E+00  1.04E+01  9.37E+01  1.07E+01 -9.62E-01  6.20E+03  3.69E+01 .........  2.20E+02
++       -4.07E+01  1.23E+01 -7.64E+01  5.19E+00 -5.32E-01  4.66E+03  3.75E+01 .........  2.08E+02
  
  SG11
-+        1.10E+02 -7.09E+01  1.07E+02  6.31E+01 -7.43E+01  1.08E+04  3.01E+02 .........  1.96E+02  9.48E+03
++       -1.18E+02 -5.43E+01 -2.02E+03  2.01E+02 -7.54E+01  2.41E+04  3.32E+02 .........  1.90E+02  9.59E+03
  
  SG12
 +       ......... ......... ......... ......... ......... ......... ......... ......... ......... ......... .........
@@ -773,9 +795,9 @@ Current Date:        7 JAN 2026
 
              1         2         3         4         5         6         7         8         9
  
-         2.63E-01  4.31E-01  5.78E-01  8.11E-01  9.00E-01  1.17E+00  1.32E+00  1.64E+00  1.89E+00
+         3.19E-01  4.00E-01  5.37E-01  8.13E-01  8.66E-01  1.03E+00  1.24E+00  1.78E+00  2.02E+00
  
- Elapsed finaloutput time in seconds:     0.70
- #CPUT: Total CPU Time in Seconds,      300.287
+ Elapsed finaloutput time in seconds:     1.19
+ #CPUT: Total CPU Time in Seconds,     1287.337
 Stop Time:
-wo 07 jan 2026 21:36:10 CET
+do 08 jan 2026 22:23:48 CET

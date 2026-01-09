@@ -1,34 +1,34 @@
 ********************************************************************************
-*                           PMX001.mlxtran                                     *
-*                            at                                                *
-*                           Monolix version : 2024R1                           *
+*                         PMX001.mlxtran                                       *
+*                         January 08, 2026 at 19:23:58                         *
+*                         Monolix version : 2024R1                             *
 ********************************************************************************
 
 
 ESTIMATION OF THE POPULATION PARAMETERS ________________________________________
 
 Fixed Effects ----------------------------     se_sa    rse(%)   P2.5_sa  P97.5_sa
-V_pop    :                            5.33     0.219       4.1      4.92      5.78
-kint_pop :                            3.43       nan         0       nan       nan
-KS_pop   :                         0.00158       nan         0       nan       nan
-ksyn_pop :                            7.21       nan         0       nan       nan
-R0_pop   :                         0.00127       nan         0       nan       nan
-Cl_pop   :                        2.07e-06  7.84e-07      37.8  1.05e-06  4.08e-06
-Q_pop    :                            4.55       nan         0       nan       nan
-V2_pop   :                            2.31       nan         0       nan       nan
+V_pop          :                      4.36     0.286      6.56      3.84      4.96
+Vm_pop         :                      4.15      0.23      5.53      3.72      4.62
+Km_pop         :                      2.75     0.275        10      2.26      3.34
+Cl_pop         :                      22.5      11.7        52      9.38      54.1
+beta_Cl_ADA_NA :                    -0.737     0.141      19.2     -1.01     -0.46
+beta_Cl_ALB    :                   -0.0988    0.0136      13.8    -0.125   -0.0721
+Q_pop          :                     0.987    0.0067     0.678     0.974         1
+V2_pop         :                      4.22    0.0724      1.72      4.08      4.36
 
 Standard Deviation of the Random Effects -
-omega_V  :                           0.355    0.0296      8.34     0.301     0.417
-omega_Cl :                            2.98     0.254      8.51      2.53      3.52
+omega_V        :                     0.563    0.0465      8.26     0.479     0.662
+omega_Cl       :                     0.283    0.0278      9.85     0.233     0.342
 
 Error Model Parameters -------------------
-a        :                        2.22e-16         0        69         0  6.51e-16
-b        :                            0.66   0.00907      1.37     0.642     0.678
+a              :                     0.244   0.00847      3.47     0.228     0.261
+b              :                  2.22e-16   0.00253  1.14e+15         0  1.03e-11
 
-Elapsed time (seconds):  1.2e+04
-CPU time     (seconds):  2.4e+04
-Exploratory phase iterations:      410 (Autostop)
-Smoothing phase iterations:         58 (Manual stop)
+Elapsed time (seconds):  3.4e+02
+CPU time     (seconds):  1.6e+03
+Exploratory phase iterations:      254 (Autostop)
+Smoothing phase iterations:        112 (Autostop)
 
  _______________________________________________________________________________
 
@@ -38,36 +38,32 @@ ESTIMATION OF THE INDIVIDUAL PARAMETERS ________________________________________
 
 
 Estimation of the individual parameters by Conditional Distribution ------------
-                 min            Q1        median            Q3           max  shrinkage(%)
-V    :          2.07          4.36           5.3          6.91          11.2         0.571
-kint :          3.43          3.43          3.43          3.43          3.43           nan
-KS   :       0.00158       0.00158       0.00158       0.00158       0.00158           nan
-ksyn :          7.21          7.21          7.21          7.21          7.21           nan
-R0   :       0.00127       0.00127       0.00127       0.00127       0.00127           nan
-Cl   :      2.43e-09       4.9e-07      2.24e-06      3.25e-05       0.00195          9.77
-Q    :          4.55          4.55          4.55          4.55          4.55           nan
-V2   :          2.31          2.31          2.31          2.31          2.31           nan
+               min            Q1        median            Q3           max  shrinkage(%)
+V  :          1.22          2.77          4.72          6.87          12.2        -0.174
+Vm :          4.15          4.15          4.15          4.15          4.15           nan
+Km :          2.75          2.75          2.75          2.75          2.75           nan
+Cl :         0.246         0.388         0.529         0.657          1.66          8.38
+Q  :         0.987         0.987         0.987         0.987         0.987           nan
+V2 :          4.22          4.22          4.22          4.22          4.22           nan
 
-Elapsed time (seconds):  2.5e+02
-CPU time     (seconds):  6.2e+02
-Iterations:      445 (Autostop)
+Elapsed time (seconds):      5.6
+CPU time     (seconds):       28
+Iterations:       75 (Autostop)
 
  -------------------------------------------------------------------------------
 
 
 Estimation of the individual parameters by Conditional Mode --------------------
-                 min            Q1        median            Q3           max  shrinkage(%)
-V    :          2.14          4.28          5.21          6.93          11.6          1.02
-kint :          3.43          3.43          3.43          3.43          3.43           nan
-KS   :       0.00158       0.00158       0.00158       0.00158       0.00158           nan
-ksyn :          7.21          7.21          7.21          7.21          7.21           nan
-R0   :       0.00127       0.00127       0.00127       0.00127       0.00127           nan
-Cl   :      2.43e-09      3.05e-07      1.37e-06      9.41e-06      0.000901          8.16
-Q    :          4.55          4.55          4.55          4.55          4.55           nan
-V2   :          2.31          2.31          2.31          2.31          2.31           nan
+               min            Q1        median            Q3           max  shrinkage(%)
+V  :          1.18          2.77          4.69          6.92          12.2        -0.192
+Vm :          4.15          4.15          4.15          4.15          4.15           nan
+Km :          2.75          2.75          2.75          2.75          2.75           nan
+Cl :         0.246         0.392         0.543         0.661          1.68          8.06
+Q  :         0.987         0.987         0.987         0.987         0.987           nan
+V2 :          4.22          4.22          4.22          4.22          4.22           nan
 
-Elapsed time (seconds):       11
-CPU time     (seconds):       41
+Elapsed time (seconds):     0.66
+CPU time     (seconds):        3
 
  -------------------------------------------------------------------------------
 
@@ -81,32 +77,52 @@ ESTIMATION OF THE FISHER INFORMATION MATRIX ____________________________________
 Estimation of the Fisher information matrix by Stochastic Approximation --------
 
 Correlation Matrix :
-   V_pop         1
-kint_pop       nan       nan
-  KS_pop       nan       nan       nan
-ksyn_pop       nan       nan       nan       nan
-  R0_pop       nan       nan       nan       nan       nan
-  Cl_pop5.0696e-05       nan       nan       nan       nan         1
-   Q_pop       nan       nan       nan       nan       nan       nan       nan
-  V2_pop       nan       nan       nan       nan       nan       nan       nan       nan
- omega_V-0.00063697       nan       nan       nan       nan-9.932e-05       nan       nan         1
-omega_Cl3.4036e-05       nan       nan       nan       nan -0.058166       nan       nan9.0602e-05         1
-       a-0.0001676       nan       nan       nan       nan0.00024233       nan       nan-6.3022e-05 8.502e-05         1
-       b 0.0019063       nan       nan       nan       nan 0.0012442       nan       nan-0.0013436-0.00055959 -0.054786         1
+         V_pop         1
+        Vm_pop-0.0086666         1
+        Km_pop-0.0035082   0.92859         1
+        Cl_pop0.00099956   0.16561   0.16333         1
+   beta_Cl_ALB-0.0015748   -0.2521  -0.23294  -0.95033         1
+beta_Cl_ADA_NA-0.00067187  -0.14725  -0.13595  -0.39925   0.12976         1
+         Q_pop-0.0069383   0.27104   0.22835  0.041228 -0.064472 -0.037424         1
+        V2_pop 0.0026718  -0.27774  -0.46462  -0.07296  0.079866  0.046979   0.12814         1
+       omega_V-0.0039106 -0.028389 -0.014763-0.0067652 0.0089557 0.0060931 -0.010527 -0.010855         1
+      omega_Cl-0.00090742 -0.031289  0.015848  0.061427 -0.066801  0.024764 -0.026303  -0.10989 0.0027348         1
+             a -0.010131  0.073302  0.072494 0.0058091-0.0063906 -0.023268  0.013194   0.14294    0.0161 -0.023448         1
+             b  0.012048 -0.030553 -0.032651-0.00079028-0.0018393  0.015203-0.0026054   -0.1496 -0.022526  0.010972  -0.90226         1
 
-WARNING : Impossible to compute the eigen values of the correlation matrix.
+                               min       max   max/min
+Eigen values           :    0.0032       2.6   8.4e+02
 
-Elapsed time (seconds):  3.3e+02
-CPU time     (seconds):  8.8e+02
-Iterations:       58 (Manual stop)
+Elapsed time (seconds):       29
+CPU time     (seconds):  1.7e+02
+Iterations:       64 (Autostop)
 
  -------------------------------------------------------------------------------
 
  _______________________________________________________________________________
 
 
+
+ESTIMATION OF THE LOG-LIKELIHOOD _______________________________________________
+
+                                                            (is)
+-2 x log-likelihood                       (OFV) :       18406.74
+Akaike Information Criteria               (AIC) :       18430.74
+Corrected Bayesian Information Criteria  (BICc) :       18487.51
+Bayesian Information Criteria             (BIC) :       18458.55
+
+Elapsed time                          (seconds) :          69.06
+CPU time                              (seconds) :         376.00
+MonteCarlo size (is):    10000 (Fixed number of iterations)
+
+
+[Importance Sampling] Standard error        : 0.196
+                      Sampling distribution : T-distribution with 5 degrees of freedom
+
+ _______________________________________________________________________________
+
 DATASET INFORMATION
 Number of individuals: 75
-Number of observations (CONC_M7): 2801
+Number of observations (CONC): 2801
 Number of doses: 300
 
