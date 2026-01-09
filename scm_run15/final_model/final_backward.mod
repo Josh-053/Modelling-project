@@ -1,0 +1,128 @@
+;; 1. Based on: run13
+;; 2. Description: PMX001 2CMT TMDD M7+ (BASE)
+;; Joshua I., Ali K.
+;; 2025-12-09
+$PROBLEM    PMX001 Two Compartment TMDD Model
+;; 2 assumptions:
+
+;; 1. Free ligand concentration is much larger than total target concentration.
+
+;; 2. Vmax = cst => Rtot = cst => target degradation rate (kout) = ligand-target complex internalization rate (kint)
+$INPUT      DUMMY=DROP ID TIME WEEK DOSE=AMT RATE CONC=DROP ADA=DROP
+            BW=DROP ALB SEX AGE=DROP CREAT=DROP COL EVID BLQ
+            CONC_M7=DV
+$DATA      ../../../dataset_clean.csv IGNORE=@
+$ABBREVIATED DERIV2=NO
+$SUBROUTINE ADVAN13 ; general nonlinear model
+            TOL=5 ; tolerance for $DES,higher TOL: more accurate,but slower computation
+
+; TOL=7 -> DES will aim for accuracy of 1E-7 for each integration step
+$MODEL      NCOMP=3 ; number of compartments
+            COMP=(DOSE,DEFDOSE,DEFOBS) ; first (central) compartment
+            COMP=(PERIPH) ; second (peripheral) compartment
+COMP=(AUC)
+$PK
+;;; CLSEX-DEFINITION START
+IF(SEX.EQ.1) CLSEX = 1  ; Most common
+IF(SEX.EQ.0) CLSEX = ( 1 + THETA(8))
+;;; CLSEX-DEFINITION END
+
+
+;;; CLALB-DEFINITION START
+   CLALB = ((ALB/31.85)**THETA(7))
+;;; CLALB-DEFINITION END
+
+;;; CL-RELATION START
+CLCOV=CLALB*CLSEX
+;;; CL-RELATION END
+
+
+IF (EVID.EQ.1) LASTDOSE = TIME
+TAD = TIME - LASTDOSE
+
+  TVCL = THETA(1)
+
+TVCL = CLCOV*TVCL
+TVVMAX = THETA(2)
+  TVKM = THETA(3)
+  TVV1 = THETA(4)
+  TVV2 = THETA(5)
+   TVQ = THETA(6)
+   
+  CL = TVCL   * EXP(ETA(1))
+VMAX = TVVMAX
+  KM = TVKM
+  V1 = TVV1
+  V2 = TVV2
+   Q = TVQ
+ 
+ K10 = CL/V1
+ K12 = Q/V1
+ K21 = Q/V2
+ 
+  S1 = V1/1 ; scale prediction based on DOSE (mmol) and DV (mmol/L)
+  S2 = V2/1
+
+$THETA  (0.01,1.08998,2.3) ; [1] CL (L/d)
+ (0.5,1.36535,3) ; VMAX
+ (0.001,0.00721817,0.02) ; KM
+ (0.5,4.26694,9) ; [2,3] V1 (L)
+ (0.00001,0.000292989,0.0006) ; V2
+ (0.1,12.9483,30) ; Q
+ ; values are determined in 3 iterations
+$THETA  (-100,-3.41223,100000) ; CLALB1
+$THETA  (-1,-0.00176292,5) ; CLSEX1
+$DES DADT(1) = -K10*A(1) -K12*A(1) +K21*A(2) -VMAX*A(1)/(KM*V1 + A(1)) ; ODE central    compartment
+     DADT(2) =            K12*A(1) -K21*A(2)                           ; ODE peripheral compartment
+        cAUC = A(1)/V1
+     DADT(3) = cAUC
+     
+$ERROR
+IPRED = F
+LLOQ = 1  ; (mg/L)
+
+; --- Residual error SDs ---
+PROP_SD = SIGMA(1)
+ADD_SD  = SIGMA(2)
+
+; --- BLQ inflation (gentle, stable) ---
+IF (BLQ.EQ.1) ADD_SD = ADD_SD + LLOQ
+
+; --- Final residual error ---
+W = SQRT(ADD_SD**2+PROP_SD**2)
+
+IF (W.LE.0.000001) W=0.000001 ; Protective code
+
+IRES=DV-IPRED
+IWRES=IRES/W
+Y = IPRED * (1 + EPS(1)) + EPS(2)
+
+$OMEGA  0.367814  ;     IIV CL
+$SIGMA  0.357712  ; EPS(1), proportional
+ 1E-13  FIX  ;     EPS(2)  ; additive, required by M7+ censoring method
+    ; residual variability
+
+$EST
+METHOD=1 INTERACTION; FOCE-I
+MAXEVAL=9999
+SIG=3
+SIGL=3
+PRINT=5
+
+$COVARIANCE PRINT=E UNCONDITIONAL MATRIX=S
+
+$TABLE ; output table for standard outcomes
+ID TIME TAD DV cAUC EVID PRED IPRED WRES IWRES RES IRES CWRES CRES NOPRINT ONEHEADER FILE=run12_sdtab
+
+$TABLE ; output table for PK parameters
+ID cAUC CL V1 V2 Q K10 K12 K21 NOPRINT NOAPPEND ONEHEADER FILE=final0_patab
+
+$TABLE ; output table for categorical covariates
+ID ADA SEX COL NOPRINT NOAPPEND ONEHEADER FILE=final0_catab
+
+$TABLE ; output table for continuous covariates
+ID BW ALB AGE CREAT NOPRINT NOAPPEND ONEHEADER FILE=final0_cotab
+
+$TABLE ; output table for parameters and covariates
+ID cAUC CL V1 V2 Q K10 K12 K21 ADA SEX COL BW ALB AGE CREAT NOPRINT NOAPPEND ONEHEADER FILE=final0_pa_cov
+

@@ -1,0 +1,5 @@
+/usr/local/bin/bootstrap run16.mod -dir=bootstrap_run16 -samples=1000 -threads=8 -nozip
+/usr/local/bin/bootstrap run16.mod -dir=bootstrap_run16 -samples=1000 -threads=6 -nozip
+/usr/local/bin/bootstrap run16.mod -dir=bootstrap_run16 -samples=500 -threads=8 -nozip
+/usr/local/bin/bootstrap run16.mod -dir=bootstrap_run16 -samples=200 -threads=8 -nozip
+/usr/local/bin/bootstrap run16.mod -dir=bootstrap_run16 -samples=500 -threads=8 -nozip

@@ -1,0 +1,6 @@
+CLALB-5          PVAL   5367.60170   5314.26009             53.34161  >   3.84150    1        YES!  2.80e-13 
+CLSEX-2          PVAL   5314.26009   5268.64273             45.61737  >   3.84150    1        YES!  1.44e-11 
+Relations included after final step:
+CL      ALB-5            SEX-2            
+--------------------
+

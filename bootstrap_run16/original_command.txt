@@ -1,0 +1,1 @@
+/usr/local/bin/bootstrap run16.mod -dir=bootstrap_run16 -samples=1000 -threads=8 -nozip
