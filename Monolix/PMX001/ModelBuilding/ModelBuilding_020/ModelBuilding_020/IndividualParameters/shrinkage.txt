@@ -1,0 +1,7 @@
+parameters,shrinkage_mode,shrinkage_mean,shrinkage_condDist
+V,-0.430325,-0.361684,0.368408
+Vm,nan,nan,nan
+Km,nan,nan,nan
+Cl,10.9319,11.1867,1.00653
+Q,nan,nan,nan
+V2,nan,nan,nan

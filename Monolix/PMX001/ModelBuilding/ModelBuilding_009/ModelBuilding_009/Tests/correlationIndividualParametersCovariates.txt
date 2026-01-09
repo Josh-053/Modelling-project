@@ -1,0 +1,3 @@
+parameter,covariate,statistics,p-value,test
+Cl,beta_Cl_ADA_NA,-7.9291,2.07948e-11,t-Test
+Cl,beta_Cl_ALB,-8.71368,7.13394e-13,t-Test

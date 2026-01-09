@@ -16,9 +16,10 @@ ADVAN13 ; general nonlinear model
 TOL=5   ; tolerance for $DES, higher TOL: more accurate, but slower computation
 
 $MODEL
-NCOMP=2                      ; number of compartments
+NCOMP=3                      ; number of compartments
 COMP=(DOSE, DEFDOSE, DEFOBS) ; first (central) compartment
 COMP=(PERIPH)                ; second (peripheral) compartment
+COMP=(AUC)                   ; continuous AUC integration
 
 $PK
 IF (EVID.EQ.1) LASTDOSE = TIME
@@ -55,7 +56,9 @@ $THETA ; values are determined in 3 iterations
 
 $DES DADT(1) = -K10*A(1) -K12*A(1) +K21*A(2) ; ODE for central    compartment
      DADT(2) =            K12*A(1) -K21*A(2) ; ODE for peripheral compartment
-     
+        cAUC = A(1)/V1                       ; calculates cumulative AUC
+     DADT(3) = cAUC                          ; continuous AUC integration
+
 $ERROR
 IPRED = F
 LLOQ = 1  ; (mg/L)
@@ -93,10 +96,10 @@ PRINT=5
 $COVARIANCE PRINT=E UNCONDITIONAL MATRIX=S
 
 $TABLE ; output table for standard outcomes
-ID TIME TAD DV EVID PRED IPRED WRES IWRES RES IRES CWRES CRES NOPRINT ONEHEADER FILE=run12_sdtab
+ID TIME TAD DV cAUC EVID PRED IPRED WRES IWRES RES IRES CWRES CRES NOPRINT ONEHEADER FILE=run12_sdtab
 
 $TABLE ; output table for PK parameters
-ID CL V1 V2 Q K10 K12 K21 NOPRINT NOAPPEND ONEHEADER FILE=run12_patab
+ID cAUC CL V1 V2 Q K10 K12 K21 NOPRINT NOAPPEND ONEHEADER FILE=run12_patab
 
 $TABLE ; output table for categorical covariates
 ID ADA SEX COL NOPRINT NOAPPEND ONEHEADER FILE=run12_catab
@@ -105,7 +108,7 @@ $TABLE ; output table for continuous covariates
 ID BW ALB AGE CREAT NOPRINT NOAPPEND ONEHEADER FILE=run12_cotab
 
 $TABLE ; output table for parameters and covariates
-ID CL V1 V2 Q K10 K12 K21 ADA SEX COL BW ALB AGE CREAT NOPRINT NOAPPEND ONEHEADER FILE=run12_pa_cov
+ID cAUC CL V1 V2 Q K10 K12 K21 ADA SEX COL BW ALB AGE CREAT NOPRINT NOAPPEND ONEHEADER FILE=run12_pa_cov
 
 ;; REFERENCES
 ;; 1) https://www.ncbi.nlm.nih.gov/books/NBK557889/

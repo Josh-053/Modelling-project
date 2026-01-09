@@ -1,0 +1,13 @@
+eta,covariate,statistics,p-value,test
+eta_V,ADA,0.850968,0.359318,Anova
+eta_V,SEX,0.147909,0.70166,Anova
+eta_V,AGE,1.60461,0.112898,Pearson
+eta_V,ALB,-0.0431868,0.965671,Pearson
+eta_V,BW,0.283933,0.777266,Pearson
+eta_V,CREAT,1.05437,0.295191,Pearson
+eta_Cl,ADA,0.0714645,0.78997,Anova
+eta_Cl,SEX,1.17444,0.282058,Anova
+eta_Cl,AGE,0.971928,0.334296,Pearson
+eta_Cl,ALB,0.313715,0.754632,Pearson
+eta_Cl,BW,0.318434,0.751065,Pearson
+eta_Cl,CREAT,0.529827,0.59784,Pearson

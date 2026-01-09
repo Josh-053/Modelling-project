@@ -1,13 +1,7 @@
 ---
-title: "Population Pharmacokinetics and Exposure–Response Analysis of PMX001 in Acute Severe Ulcerative Colitis"
-author: "Joshua Ijidakinro, Ali Kazim"
-affiliation: "Faculty of Pharmaceutical Science, KU Leuven"
-date: today
 format:
   pdf:
     papersize: A4
-toc: true
-number-sections: true
 execute:
   echo: true
   warning: false
@@ -16,29 +10,25 @@ execute:
 
 {{< pagebreak >}} 
 
-## Introduction
+# Appendix
 
-Acute severe ulcerative colitis (ASUC) affects a quarter of patients with ulcerative colitis, either at initial presentation or later in the course of the disease. Acute severe ulcerative colitis represents a medical emergency, with 36% of patients experiencing multiple episodes during their lifetimes, and about 40% requiring colectomy, along with significant morbidity. Corticosteroids are the primary treatment for acute severe ulcerative colitis, yet one in three patients fails to respond. Infliximab and ciclosporin emerged as the second-line rescue treatment options after corticosteroid failure, but with colectomy rates plateauing at about 10%, there is an unmet medical need. 
-
-## Objectives
-
-The primary aim of this study was to characterize the population pharmacokinetics (popPK) of PMX001 in adult patients with acute severe ulcerative colitis. In addition, the analysis sought to identify and quantify the influence of key clinical and demographic covariates on PMX001 exposure. Finally, the study explored the relationship between PMX001 exposure metrics and colectomy-free survival, with the goal of understanding how drug exposure may impact clinical outcomes in this critically ill patient population. 
-
-## Methods
-
-### Data Preparation
+## A1. Data Preparation
 
 ```{r}
-#| include: false
+# R packages
 library(ggplot2)
 library(tidyverse)
 library(Hmisc)
 library(PMXForest)
 library(patchwork)
+library(kableExtra)
+library(ggpubr)
+library(scales)
+library(ggsurvfit)
 ```
 
 ```{r}
-#| include: false
+# data preparation
 data <- read.table("dataset.txt", sep = " ",       # space-separated
                   header = TRUE, na.strings = ".") # treat "." as NA
 
@@ -57,7 +47,8 @@ data <- data %>% mutate(DOSE = as.numeric(DOSE),
   arrange(TIME, .by_group = TRUE) %>%
   mutate(ADA = case_when(
     ID %in% 71:75 ~ as.integer(cumany(ADA == 1)),
-    TRUE          ~ ADA)) %>%
+    TRUE          ~ ADA),
+         COL = if_else(cummax(COL == 1L) == 1L, 1L, COL)) %>%
   ungroup()
 
 data$DOSE = data$DOSE * data$BW # dose (mg) = dose (mg/kg) * body weight (kg)
@@ -66,242 +57,203 @@ write.csv(data, file = "dataset_clean.csv", quote = FALSE,
           na = ".", row.names = FALSE)
 ```
 
-Data from a Phase 1/2 study of the investigational medicinal product PMX001 was collected for **`r length(unique(data$ID))` adult patients** with acute severe ulcerative colitis over the course of 17 weeks. In this study, patients received four times one dose of 3, 6 or 9 mg/kg per two weeks. This data was processed in R (version 4.5.2). Plasma concentrations (in mg/L) were measured using enzyme-linked immuno-sorbent assay (ELISA), which had a lower limit of quantification (LLOQ) of 1.0 mg/L.
-
-Below-limit-of-quantification (BLQ) observations were handled using the M7+ method during the model development. M7+ method is a censoring method that replaces all BLQ values with **zero**, and adds the LLOQ to the additive error. Missing covariate data were filled using simple imputation with the function `fill(c(covariate),.direction = "downup")` from `tidyverse` package. Parameter estimates for the model development followed an iterative approach comprising at least three iterations, until the difference between estimates no longer surpassed one percent. This approach was executed for both the base and the covariate model development. 
-
-### Model Development and Validation
-
-Population pharmacokinetic (PopPK) modeling was conducted using NONMEM, with model execution and workflow management supported by Pirana and Perl-speaks-NONMEM (PsN). Based on the censored dataset, a two-compartment base model with linear elimination was constructed. 
-
-Covariate selection was performed using the enhanced stepswise covariate model (in short, SCM+) algorithm integrated in PsN. The covariates in the dataset were as follows: antidrug antibody (= immunogenicity, `ADA`), age, serum albumin concentration (`ALB`), body weight (`BW`), serum creatinine concentration (`CREAT`), and sex. Covariates that were significantly correlated with the PK parameters, were assessed for clinical relevance using a forest plot, generated from the R package `PMXForest`. From there, the final model was generated (see Appendix A1). Model robustness and parameter precision were assessed through sampling importance resampling (SIR); in cases of computational limitations, 1000 replicates were used, which provide comparable precision. Predictive performance was evaluated using visual predictive checks (VPC) based on 1000 simulated datasets.
-
-### Exposure-Response Analysis
-
-After establishing and validating the popPK model, an exposure-response model was set up for colectomy at week 12. A quantile-quantile (QQ) plot for area under the curve from zero to last point (AUC~0-tlast~) and colectomy was generated using `ggplot2` package.
-
-```{r spearman correlation matrix all R}
-datacor <- data %>%
-     select(ADA, AGE, ALB, BW, CREAT, COL, SEX)
-rcorr(as.matrix(datacor), type = "spearman")$r %>%
-  signif(digits = 3)
-```
-
-```{r spearman correlation matrix all p}
-rcorr(as.matrix(datacor), type = "spearman")$P %>%
-  signif(digits = 3)
-```
-
-```{r dataset general info}
-length(unique(data$ID))
-```
-
 {{< pagebreak >}} 
 
-## Results
+## A2. Final Model {.unnumbered .unlisted}
 
-### Covariate Relevance: Forest Plot
+### A2.1. Two-Compartment Target-Mediated Drug Disposition Model with Michaelis-Menten Approximation
 
-This section adds a forest plot to assess the relevance of key covariates (CREAT, SEX, ALB, BW, ADA, AGE) on exposure in the cleaned dataset.
-
-```{r}
-library(PMXForest)
-library(ggplot2)
-
-theme_set(theme_bw())
-
-ALB_REF_V1 <- 31.84
-
-cs <- PMXForest::getCovStats(
-  data,
-  covariates = "ALB",
-  minLevels  = 10,
-  probs      = c(0.05, 0.95),
-  idVar      = "ID",
-  missVal    = -99,
-  nsig       = 3
-)
-
-dfCovs <- PMXForest::createInputForestData(list(
-  ADA = c(0, 1),
-  ALB = c(cs$ALB["5%"], cs$ALB["95%"])
-))
-
-covnames <- c(
-  "ADA negative","ADA positive",
-  "ALB 27 g/L","ALB 35 g/L"
-)
-
-covariateGroupNames <- c("ADA","Albumin")
-
-functionListName <- c("CL","V1")
-
-# ---- Helpers (copy as-is) ----
-.once_log <- local({ .done <- FALSE; function(expr) { if (!.done) { .done <<- TRUE; force(expr) } } })
-.normalize_thetas <- function(thetas) {
-  if (is.data.frame(thetas)) thetas <- unlist(thetas, use.names = TRUE)
-  if (is.matrix(thetas))     thetas <- as.vector(thetas)
-  nm <- names(thetas)
-  if (is.null(nm) || any(is.na(nm)) || all(nm == "")) nm <- paste0("THETA", seq_along(thetas))
-  nm <- toupper(nm); nm <- gsub("\\s+", "", nm); nm <- gsub("[()]", "", nm); nm <- gsub("[^A-Z0-9_]", "", nm)
-  names(thetas) <- nm
-  thetas
-}
-.get_theta <- function(thetas, k) {
-  nm <- names(thetas)
-  candidates <- c(paste0("THETA", k), paste0("THETA(", k, ")"), paste0("THETA.", k), paste0("THETA_", k), paste0("THETA", k, "."))
-  for (c in candidates) { idx <- match(c, nm, nomatch = 0); if (idx > 0) return(unname(thetas[[idx]])) }
-  if (length(thetas) >= k) return(unname(thetas[[k]]))
-  stop(sprintf("Theta %d not found in 'thetas'. Available names: %s", k, paste(nm, collapse = ", ")))
-}
-```
-
-```{r}
-# ---- Your covariate functions (robust) ----
-f_CL <- function(thetas, df, ...) {
-  thetas <- .normalize_thetas(thetas)
-  .once_log(message("f_CL: thetas names = ", paste(names(thetas), collapse = ", ")))
-  ADA <- df[["ADA"]]
-  TH5 <- .get_theta(thetas, 5)
-  CLADA <- if (ADA == 0) 1 else (1 + TH5)
-  CLADA
-}
-
-f_V1 <- function(thetas, df, ...) {
-  thetas <- .normalize_thetas(thetas)
-  .once_log(message("f_V1: thetas names = ", paste(names(thetas), collapse = ", ")))
-  ALB <- df[["ALB"]]
-  TH6 <- .get_theta(thetas, 6)
-  V1ALB <- 1 + TH6 * (ALB - ALB_REF_V1)
-  V1ALB
-}
-
-# ---- Data & parameters ----
-extFile <- "run12.ext"
-covFile <- "run12.cov"
-
-dfSamplesCOV <- getSamples(covFile, extFile, n = 1000)
-
-# Optional but recommended: normalize column names at the source
-nm <- names(dfSamplesCOV)
-nm <- toupper(nm); nm <- gsub("\\s+", "", nm); nm <- gsub("[()]", "", nm); nm <- gsub("[^A-Z0-9_]", "", nm)
-names(dfSamplesCOV) <- nm
-
-
-# ---- Compute ----
-dfresCOV <- getForestDFSCM(
-  dfCovs           = dfCovs,
-  cdfCovsNames     = covnames,
-  functionList     = list(f_CL, f_V1),
-  functionListName = functionListName,
-  noBaseThetas     = 6,
-  dfParameters     = dfSamplesCOV,
-  iMiss            = -99
-)
-```
-
-```{r}
-forestPlot(dfresCOV,parameters= c("CL", "V1"),
-           groupNameLabels    = covariateGroupNames,
-           referenceInfo      = "Reference: (CL) ADA = 0 (negative), ALB = 31.88 g/L; (V1) ALB = 31.85 g/L, BW = 1.03 mg/dL",
-           noVar              = 4,
-           size = theme_get()$text$size * 0.92,
-           tabTextSize = 10)
-ggsave("PMXForestSCMPlus.png", width = 11, height = 7, units = "in")
-```
-
-## Discussion
-
-## Conclusion
-
-## Acknowledgements {.unnumbered}
-
-## References {.unnumbered}
-
-{{< pagebreak >}} 
-
-## Appendix {.unnumbered}
-
-### A1. Final Model {.unnumbered .unlisted}
 ```{fortran}
 #| eval: false
-;; 1. Based on: run09
-;; 2. Description: PMX001 2CMT LINEAR M7+
-;; Joshua I., Ali K.
-;; 2026-01-07
+$PROBLEM PMX001 Two Compartment TMDD Model
+;; 2 assumptions:
+;; 1. Free ligand concentration is much larger than total target conc.
+;; 2. Vmax = cst => Rtot = cst => target degradation rate (kout)
+;;    = ligand-target complex internalization rate (kint)
 
-$PROBLEM PMX001 Two Compartment Model with Linear Elimination (M7+ Censoring)
-
-$INPUT DUMMY=DROP ID TIME WEEK DOSE=AMT RATE CONC=DROP ADA BW ALB SEX AGE
-CREAT COL EVID BLQ CONC_M7=DV
+$INPUT DUMMY=DROP ID TIME WEEK DOSE=AMT RATE CONC=DROP ADA BW ALB SEX AGE 
+       CREAT COL EVID BLQ CONC_M7=DV
 
 $DATA dataset_clean.csv IGNORE=@
 
 $ABBR DERIV2=NO
 
 $SUBROUTINES
-ADVAN13 ; general nonlinear model
-TOL=5   ; tolerance for $DES, higher TOL: more accurate, but slower to compute
+ADVAN13
+TOL=5
 
 $MODEL
-NCOMP = 2                       ; number of compartments
-COMP  = (DOSE, DEFDOSE, DEFOBS) ; first  (central)    compartment
-COMP  = (PERIPH)                ; second (peripheral) compartment
+NCOMP=3                      ; number of compartments
+COMP=(DOSE, DEFDOSE, DEFOBS) ; first (central) compartment
+COMP=(PERIPH)                ; second (peripheral) compartment
+COMP=(AUC)                   ; continuous AUC integration
 
 $PK
-; time after dose
 IF (EVID.EQ.1) LASTDOSE = TIME
 TAD = TIME - LASTDOSE
 
-; fixed effects
+  TVCL = THETA(1)
+TVVMAX = THETA(2)
+  TVKM = THETA(3)
+  TVV1 = THETA(4)
+  TVV2 = THETA(5)
+   TVQ = THETA(6)
+
+CLALB = ((ALB/31.85)**THETA(7))
+   
+  CL = TVCL   * EXP(ETA(1)) * CLALB
+VMAX = TVVMAX
+  KM = TVKM
+  V1 = TVV1
+  V2 = TVV2
+   Q = TVQ
+ 
+ K10 = CL/V1
+ K12 = Q/V1
+ K21 = Q/V2
+ 
+  S1 = V1/1 ; scale prediction based on DOSE (mg) and DV (mg/L)
+  S2 = V2/1
+
+$THETA ; values are determined in 3 iterations
+(0.01,     0.944,       2.3) ; CL (L/d)
+(0.5,      1.38,          3) ; VMAX
+(0.001,    0.00758,    0.02) ; KM
+(0.5,      4.42,          9) ; V1 (L)
+(0.00001,  0.000307, 0.0006) ; V2
+(0.1,     13,            30) ; Q
+(-100,    -3.41223,      50) ; CLALB
+
+$DES DADT(1) = -K10*A(1) -K12*A(1) +K21*A(2) -VMAX*A(1)/(KM*V1 + A(1))
+     DADT(2) =            K12*A(1) -K21*A(2)                          
+        cAUC = A(1)/V1
+     DADT(3) = cAUC
+
+$ERROR
+IPRED = F
+LLOQ = 1  ; (mg/L)
+
+; --- Residual error SDs ---
+PROP_SD = SIGMA(1)
+ADD_SD  = SIGMA(2)
+
+; --- BLQ inflation (gentle, stable) ---
+IF (BLQ.EQ.1) ADD_SD = ADD_SD + LLOQ
+
+; --- Final residual error ---
+W = SQRT(ADD_SD**2+PROP_SD**2)
+
+IF (W.LE.0.000001) W=0.000001 ; Protective code
+
+IRES=DV-IPRED
+IWRES=IRES/W
+Y = IPRED * (1 + EPS(1)) + EPS(2)
+
+$OMEGA 0.366 ; IIV CL
+
+$SIGMA    ; residual variability
+0.327     ; EPS(1), proportional
+1E-13 FIX ; EPS(2); additive, required by M7+ censoring method
+
+$EST
+METHOD=1 INTERACTION; FOCE-I
+MAXEVAL=9999
+SIG=3
+SIGL=3
+PRINT=5
+
+$COVARIANCE PRINT=E UNCONDITIONAL MATRIX=S
+
+$TABLE ; output table for standard outcomes
+ID TIME TAD DV EVID PRED IPRED WRES IWRES RES IRES CWRES CRES NOPRINT
+ONEHEADER FILE=run16_sdtab
+
+$TABLE ; output table for parameters and covariates
+ID cAUC CL VMAX KM V1 V2 Q K10 K12 K21 ADA SEX COL BW ALB AGE CREAT NOPRINT
+NOAPPEND ONEHEADER FILE=run16_pa_cov
+```
+
+{{< pagebreak >}} 
+
+### A2.2. Two-Compartment Model with Linear Elimination
+
+```{fortran}
+#| eval: false
+$PROBLEM PMX001 Two Compartment Linear Elimination
+
+$INPUT DUMMY=DROP ID TIME WEEK DOSE=AMT RATE CONC=DROP ADA BW ALB SEX AGE
+       CREAT COL EVID BLQ CONC_M7=DV
+
+$DATA dataset_clean.csv IGNORE=@
+
+$ABBR DERIV2=NO
+
+$SUBROUTINES
+ADVAN13
+TOL=5
+
+$MODEL
+NCOMP=3
+COMP=(DOSE, DEFDOSE, DEFOBS)
+COMP=(PERIPH)
+COMP=(AUC)
+
+$PK
+IF (EVID.EQ.1) LASTDOSE = TIME
+TAD = TIME - LASTDOSE
+
 TVCL = THETA(1)
 TVV1 = THETA(2)
 TVV2 = THETA(3)
  TVQ = THETA(4)
 
-; covariate effects
-IF (ADA.EQ.0) CLADA = 1               ; most common
-IF (ADA.EQ.1) CLADA = (1 + THETA(5))
+IF(ADA.EQ.0) CLADA = 1  ; Most common
+IF(ADA.EQ.1) CLADA = ( 1 + THETA(5))
 V1ALB = ( 1 + THETA(6)*(ALB - 31.84))
-
-; individual values with random effects (ETAs)
- CL = TVCL * EXP(ETA(1)) * CLADA
- V1 = TVV1 * EXP(ETA(2)) * V1ALB
- V2 = TVV2
-  Q = TVQ
-
-K10 = CL/V1
-K12 = Q/V1
-K21 = Q/V2
-
-; scaling factor: DOSE (mg) and DV (mg/L)
- S1 = V1/1
- S2 = V2/1
+   
+  CL = TVCL * EXP(ETA(1)) * CLADA
+  V1 = TVV1 * EXP(ETA(2)) * V1ALB
+  V2 = TVV2
+   Q = TVQ
+ 
+ K10 = CL/V1
+ K12 = Q/V1
+ K21 = Q/V2
+ 
+  S1 = V1/1 ; scale prediction based on DOSE (mg) and DV (mg/L)
+  S2 = V2/1
 
 $THETA ; values are determined in 3 iterations
-(0.001, 1.41,    3)    ; CL (L/d) [1]
-(0.001, 4.73,    7)    ; V1 (L) [2,3]
-(0.01,  0.231, 0.8)    ; V2 (L)
-(0.001, 2.15,    5)    ; Q (L/d)
-(0.001, 5.78,    8)    ; CLADA
-(-0.140,-0.127,-0.001) ; V1ALB
+(0.001,   1.41,      3) ; CL (L/d)
+(0.001,   4.73,      7) ; V1 (L)
+(0.01,    0.231,   0.8) ; V2
+(0.001,   2.15,      5) ; Q
+(0.001,   5.78,      8) ; CLADA
+(-0.140, -0.127, -0.001) ; V1ALB1
 
-$DES DADT(1) = -K10*A(1) - K12*A(1) + K21*A(2) ; ODE central    compartment
-     DADT(2) =             K12*A(1) - K21*A(2) ; ODE peripheral compartment
-     
+$DES DADT(1) = -K10*A(1) -K12*A(1) +K21*A(2) ; ODE central    compartment
+     DADT(2) =            K12*A(1) -K21*A(2) ; ODE peripheral compartment
+        cAUC = A(1)/V1                       ; calculates cumulative AUC
+     DADT(3) = cAUC                          ; continuous AUC integration
+
 $ERROR
 IPRED = F
-LLOQ = 1 ; (mg/L)
+LLOQ = 1  ; (mg/L)
 
+; --- Residual error SDs ---
 PROP_SD = SIGMA(1)
 ADD_SD  = SIGMA(2)
 
-IF (BLQ.EQ.1) ADD_SD = ADD_SD + LLOQ ; BLQ inflation
-W = SQRT(ADD_SD**2+PROP_SD**2)       ; final residual error
-IF (W.LE.0.000001) W=0.000001        ; protective code
+; --- BLQ inflation (gentle, stable) ---
+IF (BLQ.EQ.1) ADD_SD = ADD_SD + LLOQ
 
-IRES  = DV - IPRED
-IWRES = IRES / W
+; --- Final residual error ---
+W = SQRT(ADD_SD**2+PROP_SD**2)
+
+IF (W.LE.0.000001) W=0.000001 ; Protective code
+
+IRES=DV-IPRED
+IWRES=IRES/W
 Y = IPRED * (1 + EPS(1)) + EPS(2)
 
 $OMEGA
@@ -321,19 +273,17 @@ PRINT=5
 $COVARIANCE PRINT=E UNCONDITIONAL MATRIX=S
 
 $TABLE ; output table for standard outcomes
-ID TIME TAD DV EVID PRED IPRED WRES IWRES RES IRES CWRES CL V1 V2 Q K10 K12 
-K21 ADA SEX COL BW ALB AGE CREAT NOPRINT ONEHEADER FILE=run12_table
+ID TIME TAD DV cAUC EVID PRED IPRED WRES IWRES RES IRES CWRES CRES NOPRINT
+ONEHEADER FILE=run12_sdtab
 
-;; REFERENCES
-;; 1) https://www.ncbi.nlm.nih.gov/books/NBK557889/
-;; 2) https://pmc.ncbi.nlm.nih.gov/articles/PMC8301575/
-;; 3) https://ascpt.onlinelibrary.wiley.com/doi/abs/10.1016/j.clpt.2004.12.212
+$TABLE ; output table for parameters and covariates
+ID cAUC CL V1 V2 Q K10 K12 K21 ADA SEX COL BW ALB AGE CREAT NOPRINT NOAPPEND
+ONEHEADER FILE=run12_pa_cov
 ```
 
-{{< pagebreak >}} 
-
-### A2. Exploratory Data Anslysis {.unnumbered .unlisted}
+## A3. Exploratory Data Anslysis {.unnumbered .unlisted}
 ```{r conc_time profile}
+#| echo: false
 data <- data %>%
   arrange(ID, TIME) %>%
   group_by(ID) %>%
@@ -365,6 +315,7 @@ ggplot(data %>% filter(CONC_M7!=0),
 ```
 
 ```{r}
+#| echo: false
 h1 <- ggplot(data, aes(x = AGE)) +
   geom_histogram(color = "black", fill = "white", binwidth = 3) +
   theme_minimal()
@@ -377,24 +328,403 @@ h3 <- ggplot(data, aes(x = BW)) +
 h4 <- ggplot(data, aes(x = CREAT)) +
   geom_histogram(color = "black", fill = "white", binwidth = 0.12) +
   theme_minimal()
-h1 + h2 + h3 + h4 + plot_annotation(title = "Histograms of Continuous Covariates")
+h1 + h2 + h3 + h4 +
+  plot_annotation(title = "Histograms of Continuous Covariates")
+```
+
+## A4. Exposure-Response Quartile Quartile Plot
+
+```{r}
+#| echo: false
+dat3 <- read.table(file = "run16_pa_cov", skip = 1, header = TRUE)
 ```
 
 
 ```{r}
-data7d <- data %>%
+#| echo: false
+dat3 <- dat3 %>%
+  mutate(COL = as.integer(as.character(COL))) %>%
+  group_by(ID) %>%
+  mutate(had_one = any(COL == 1, na.rm = TRUE),
+    COL = if_else(had_one & (is.na(COL) | COL == 0L), 1L, 0L)) %>%
+  select(-had_one) %>%
+  ungroup()
+
+dat3 <- dat3 %>% mutate(COL = as.numeric(COL))
+
+dat3 <- dat3 %>%
   mutate(
-    TIME = as.numeric(TIME), # ensure numeric
-    TIME = round(TIME))      # round to nearest integer
+    cAUC = suppressWarnings(as.numeric(cAUC)),
+    COL = factor(COL, levels = c(0, 1),
+                 labels = c("No Colectomy", "Colectomy")),
+    quantile = cut(cAUC,
+                   breaks = seq(min(cAUC, na.rm = TRUE),
+                                max(cAUC, na.rm = TRUE),
+                                length.out = 5), # 4 bins → 5 break points
+      right = TRUE, left = TRUE))
 
+# --- 3) Quick summary by group ---
+summary_tbl <- dat3 %>%
+  group_by(COL) %>%
+  summarise(n = n(),
+            median_cAUC = median(cAUC),
+            IQR_cAUC = IQR(cAUC),
+            mean_cAUC = mean(cAUC),
+            sd_cAUC = sd(cAUC),
+            .groups = "drop")
+
+print(summary_tbl)
+
+# --- 4) Logistic regression: probability of Colectomy ~ cAUC ---
+# Use numeric 0/1 as response for clarity
+logit_model <- glm(COL ~ cAUC, data = dat3, family = binomial)
+
+# Prediction grid across cAUC range
+curve_df <- data.frame(cAUC = seq(min(dat3$cAUC), max(dat3$cAUC),
+                                  length.out = 100))
+curve_df$pred_prob <- predict(logit_model, newdata = curve_df,
+                              type = "response")
+
+summary_df <- dat3 %>%
+  filter(!is.na(quantile)) %>%
+  group_by(quantile) %>%
+  summarise(cAUC_min = min(cAUC),
+            cAUC_max = max(cAUC),
+            prob_col = mean(COL == "Colectomy"),
+            .groups = "drop") %>%
+  mutate(
+    perc_label = percent(prob_col, accuracy = 1),            
+    x_mid = (cAUC_min + cAUC_max) / 2,
+    y_label = pmax(prob_col * 0.5, 0.07))
+
+rect_df <- bind_rows(
+  summary_df %>%
+    transmute(quantile, cAUC_min, cAUC_max, ymin = 0, ymax = 1,
+              type = "No colectomy"),
+  summary_df %>%
+    transmute(quantile, cAUC_min, cAUC_max, ymin = 0, ymax = prob_col,
+              type = "Colectomy"))
+
+ggplot(rect_df) +
+  geom_rect(aes(xmin = cAUC_min, xmax = cAUC_max,
+                ymin = ymin, ymax = ymax, fill = type),
+            color = "black", size = 0.3, alpha = 0.8) +
+  geom_text(data = summary_df,
+            aes(x = x_mid, y = y_label, label = perc_label),
+            color = "black", fontface = "bold", size = 4) +
+  geom_line(data = curve_df,
+            aes(x = cAUC, y = pred_prob),
+            color = "#00244D", size = 1) +
+  scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
+  scale_fill_manual(
+    name = "Status",
+    values = c("No colectomy" = "#C7E3FF", "Colectomy" = "#3C87C9")
+  ) +
+  labs(
+    x = "AUC (from Time = 0 to last) (mg·day/L)",
+    y = "Probability of Colectomy",
+    title = "Quartile Plot of AUC with Colectomy Probability"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+ggsave("QQplot.png", width = 5, height = 4.0, dpi = 300)
 ```
 
 ```{r}
-ggplot(data7d %>% filter(TIME == 7),
-       aes(x = TIME,
-           y = CONC_M7)) +
-  geom_violin(trim = FALSE) +
-  geom_boxplot(width = 0.1, outlier.shape = 16, outlier.size = 2, outlier.colour = "red") +
-  theme_minimal()
+
+# --- 1) Read and normalize COL at subject level (unchanged logic) ---
+dat3 <- read.table(file = "run16_pa_cov", skip = 1, header = TRUE)
+
+dat3 <- dat3 %>%
+  mutate(COL = as.integer(as.character(COL))) %>%
+  group_by(ID) %>%
+  mutate(had_one = any(COL == 1, na.rm = TRUE),
+         COL = if_else(had_one & (is.na(COL) | COL == 0L), 1L, 0L)) %>%
+  select(-had_one) %>%
+  ungroup()
+
+dat3 <- dat3 %>% mutate(COL = as.numeric(COL))
+
+# --- 2) Coerce cAUC to numeric and grab ONLY the last cAUC per subject ---
+# Replace TIME with your actual time column (if available).
+dat3 <- dat3 %>%
+  mutate(cAUC = suppressWarnings(as.numeric(cAUC)))
+
+last_auc_by_id <- dat3 %>%
+  group_by(ID) %>%
+  # If you have a time column, keep the last by time:
+  arrange(ID, TAD, .by_group = TRUE) %>%  # <-- change TIME if needed
+  slice_tail(n = 1) %>%
+  ungroup() %>%
+  transmute(ID, cAUC_last = cAUC)
+
+# Join last cAUC back and overwrite cAUC
+dat3 <- dat3 %>%
+  left_join(last_auc_by_id, by = "ID") %>%
+  mutate(cAUC = cAUC_last) %>%
+  select(-cAUC_last)
+
+# (Recommended) Collapse to ONE row per ID to avoid duplicate weighting later
+# Keep the subject-level status and last cAUC only
+dat3 <- dat3 %>%
+  group_by(ID) %>%
+  slice(1) %>%
+  ungroup()
+
+# --- 3) Factors and quantiles now use "AUC at last point per subject" ---
+dat3 <- dat3 %>%
+  mutate(
+    COL = factor(COL, levels = c(0, 1),
+                 labels = c("No Colectomy", "Colectomy")),
+    quantile = cut(
+      cAUC,
+      breaks = seq(min(cAUC, na.rm = TRUE),
+                   max(cAUC, na.rm = TRUE),
+                   length.out = 5), # 4 bins → 5 breakpoints
+      right = TRUE, left = TRUE
+    )
+  )
+
+# --- 4) Summary by colectomy status (now subject-level) ---
+summary_tbl <- dat3 %>%
+  group_by(COL) %>%
+  summarise(
+    n = n(),
+    median_cAUC = median(cAUC, na.rm = TRUE),
+    IQR_cAUC = IQR(cAUC, na.rm = TRUE),
+    mean_cAUC = mean(cAUC, na.rm = TRUE),
+    sd_cAUC = sd(cAUC, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+print(summary_tbl)
+
+# --- 5) Logistic regression: Colectomy ~ AUC_at_last ---
+logit_model <- glm(COL ~ cAUC, data = dat3, family = binomial)
+
+curve_df <- data.frame(
+  cAUC = seq(min(dat3$cAUC, na.rm = TRUE),
+             max(dat3$cAUC, na.rm = TRUE),
+             length.out = 100)
+)
+curve_df$pred_prob <- predict(logit_model, newdata = curve_df, type = "response")
+
+summary_df <- dat3 %>%
+  filter(!is.na(quantile)) %>%
+  group_by(quantile) %>%
+  summarise(
+    cAUC_min = min(cAUC, na.rm = TRUE),
+    cAUC_max = max(cAUC, na.rm = TRUE),
+    prob_col = mean(COL == "Colectomy", na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    perc_label = percent(prob_col, accuracy = 1),
+    x_mid = (cAUC_min + cAUC_max) / 2,
+    y_label = pmax(prob_col * 0.5, 0.07)
+  )
+
+rect_df <- bind_rows(
+  summary_df %>%
+    transmute(quantile, cAUC_min, cAUC_max, ymin = 0, ymax = 1, type = "No colectomy"),
+  summary_df %>%
+    transmute(quantile, cAUC_min, cAUC_max, ymin = 0, ymax = prob_col, type = "Colectomy")
+)
+
+ggplot(rect_df) +
+  geom_rect(aes(xmin = cAUC_min, xmax = cAUC_max, ymin = ymin, ymax = ymax, fill = type),
+            color = "black", size = 0.3, alpha = 0.8) +
+  geom_text(data = summary_df,
+            aes(x = x_mid, y = y_label, label = perc_label),
+            color = "black", fontface = "bold", size = 4) +
+  geom_line(data = curve_df, aes(x = cAUC, y = pred_prob),
+            color = "#00244D", size = 1) +
+  scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
+  scale_fill_manual(
+    name = "Status",
+    values = c("No colectomy" = "#C7E3FF", "Colectomy" = "#3C87C9")
+  ) +
+  labs(
+    x = "AUC at Last Time (mg·day/L)",
+    y = "Probability of Colectomy",
+    title = "Quartile Plot of AUC (Last Point per Subject) with Colectomy Probability"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
 
+
+## A5. Goodness of Fit Plots
+
+```{r}
+#| echo: false
+dat <- read.table (file='run12_sdtab', skip=1, header=T)
+dat2 <- read.table (file='run16_sdtab', skip=1, header=T)
+```
+
+```{r}
+#| echo: false
+p1 <- ggplot(dat %>% filter(CONC_M7 != 0)) +
+  geom_point (aes(x=PRED, y=CONC_M7),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  labs(title = "Linear Elimination",
+       y = "Observed Concentration",
+       x = "Predicted Concentration") +
+  xlim(0, 200) +
+  theme_minimal()
+p2 <- ggplot(dat2 %>% filter(CONC_M7 != 0)) +
+  geom_point (aes(x=PRED, y=CONC_M7),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  labs(title = "TMDD (MM Approximation)",
+       y = "Observed Concentration",
+       x = "Predicted Concentration") +
+  xlim(0,200) +
+  theme_minimal()
+p1_2 <- p1+p2 + patchwork::plot_annotation(title = "Population Predicted versus Observed Concentrations in Two-Compartment Models")
+
+ggsave("PRED_OBS.png", plot = p1_2, width = 8, height = 5, units = "in")
+
+p1_2
+```
+
+```{r}
+#| echo: false
+p11 <- ggplot(dat %>% filter(CONC_M7 != 0)) +
+  geom_point (aes(x=log10(PRED), y=log10(CONC_M7)),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  labs(title = "Linear Elimination",
+       y = "Observed Concentration",
+       x = "Predicted Concentration") +
+  theme_minimal()
+p12 <- ggplot(dat2 %>% filter(CONC_M7 != 0)) +
+  geom_point (aes(x=log10(PRED), y=log10(CONC_M7)),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=1, intercept=0), linetype='dashed') +
+  labs(title = "TMDD (MM Approximation)",
+       y = "Observed Concentration",
+       x = "Predicted Concentration") +
+  theme_minimal()
+p11_12 <- p11 + p12 + patchwork::plot_annotation(title = "Log-Scaled Population Predicted versus Observed Concentrations in Two-Compartment Models")
+
+ggsave("PRED_OBS_log.png", plot = p11_12, width = 9, height = 5, units = "in")
+
+p11_12
+```
+
+```{r}
+#| echo: false
+p3 <- ggplot(dat) + # CWRES used because of FOCE-I
+  geom_point (aes(x=PRED, y=CWRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  labs(title = "Linear Elimination",
+       y = "Condtional Weighed Residuals",
+       x = "Predicted Concentration") +
+  xlim(0,300)+
+  ylim(-4,7) + 
+  theme_minimal()
+p4 <- ggplot(dat2) + # CWRES used because of FOCE-I
+  geom_point (aes(x=PRED, y=CWRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  labs(title = "TMDD (MM Approximation)",
+       y = "Condtional Weighed Residuals",
+       x = "Predicted Concentration") +
+  xlim(0,300)+
+  ylim(-4,7) + 
+  theme_minimal()
+p3_4 <- p3 + p4 + patchwork::plot_annotation(title = "Conditional Weighed Residuals versus Population Predicted Concentrations in Two-Compartment Models")
+ggsave("PRED_CWRES_PRED.png", plot = p3_4, width = 9.3, height = 5, units = "in")
+
+p3_4
+```
+
+```{r}
+#| echo: false
+p5 <- ggplot(dat) +
+  geom_point (aes(x=PRED, y=RES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  labs(title = "Linear Elimination",
+       y = "Population Residuals",
+       x = "Predicted Concentration") +
+    xlim(0,300) +
+  ylim(-200,400) +
+  theme_minimal()
+p6 <- ggplot(dat2) +
+  geom_point (aes(x=PRED, y=RES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  labs(title = "TMDD (MM Approximation)",
+       y = "Population Residuals",
+       x = "Predicted Concentration") +
+  xlim(0,300) +
+  ylim(-200,400) +
+  theme_minimal()
+p5_6 <- p5+p6 + patchwork::plot_annotation(title = "Population Residuals versus Population Predicted Concentrations in Two-Compartment Models")
+ggsave("PRED_RES_PRED.png", plot = p5_6, width = 9.3, height = 5, units = "in")
+
+p5_6
+```
+
+```{r}
+#| echo: false
+p7 <- ggplot(dat) + # CRES used because of FOCE-I
+  geom_point (aes(x=PRED, y=CRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  labs(title = "Linear Elimination",
+       y = "Conditional Population Residuals",
+       x = "Predicted Concentration") +
+    xlim(0,200) + 
+  ylim(-100,500) +
+  theme_minimal()
+p8 <- ggplot(dat2) + # CRES used because of FOCE-I
+  geom_point (aes(x=PRED, y=CRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  labs(title = "TMDD (MM Approximation)",
+       y = "Conditional Population Residuals",
+       x = "Predicted Concentration") +
+  xlim(0,200) + 
+  ylim(-100,500) +
+  theme_minimal()
+p7_8 <- p7+p8 + patchwork::plot_annotation(title = "Conditional Population Residuals versus Population Predicted Concentrations in Two-Compartment Models")
+ggsave("PRED_CRES_PRED.png", plot = p7_8, width = 9.6, height = 5, units = "in")
+
+p7_8
+```
+
+```{r}
+#| echo: false
+p9 <- ggplot(dat %>% filter(CWRES != 0)) + # CWRES used because of FOCE-I
+  geom_point (aes(x=TAD, y=CWRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  labs(title = "Linear Elimination",
+       y = "Conditional Weighed Residuals",
+       x = "Time After Dose (days)") +
+    ylim(-3,5) +
+  theme_minimal()
+p10 <- ggplot(dat2 %>% filter(CWRES != 0)) + # CWRES used because of FOCE-I
+  geom_point (aes(x=TAD, y=CWRES),  colour='darkblue', size = 0.4) +
+  geom_abline(aes(slope=0, intercept=0), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=3), linetype='dashed') +
+  geom_abline(aes(slope=0, intercept=-3), linetype='dashed') +
+  labs(title = "TMDD (MM Approximation)",
+       y = "Conditional Weighed Residuals",
+       x = "Time After Dose (days)") +
+  ylim(-3,5) +
+  theme_minimal()
+p9_10 <- p9 + p10 + patchwork::plot_annotation(title = "Conditional Weighed Residuals versus Time After Dose in Two-Compartment Models")
+ggsave("PRED_CWRES_TAD.png", plot = p9_10, width = 8, height = 5, units = "in")
+
+p9_10
+```

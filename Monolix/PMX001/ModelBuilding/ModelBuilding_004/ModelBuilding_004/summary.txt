@@ -1,0 +1,79 @@
+********************************************************************************
+*                         ModelBuilding_004.mlxtran                            *
+*                         January 08, 2026 at 20:26:26                         *
+*                         Monolix version : 2024R1                             *
+********************************************************************************
+
+
+ESTIMATION OF THE POPULATION PARAMETERS ________________________________________
+
+Fixed Effects ----------------------------
+V_pop          :                      4.33
+Vm_pop         :                      4.49
+beta_Vm_SEX_1  :                   0.00745
+Km_pop         :                      3.06
+Cl_pop         :                      21.3
+beta_Cl_ADA_NA :                    -0.762
+beta_Cl_ALB    :                   -0.0988
+Q_pop          :                      1.01
+V2_pop         :                      4.24
+
+Standard Deviation of the Random Effects -
+omega_V        :                      0.56
+omega_Cl       :                     0.271
+
+Error Model Parameters -------------------
+a              :                     0.245
+b              :                  2.22e-16
+
+Elapsed time (seconds):  4.3e+02
+CPU time     (seconds):  2.7e+03
+Exploratory phase iterations:      290 (Autostop)
+Smoothing phase iterations:        100 (Autostop)
+
+ _______________________________________________________________________________
+
+
+
+ESTIMATION OF THE INDIVIDUAL PARAMETERS ________________________________________
+
+
+Estimation of the individual parameters by Conditional Distribution ------------
+               min            Q1        median            Q3           max  shrinkage(%)
+V  :          1.21          2.83          4.75          6.75          11.8        0.0973
+Vm :          4.49          4.49          4.52          4.52          4.52           nan
+Km :          3.06          3.06          3.06          3.06          3.06           nan
+Cl :         0.219         0.362         0.477         0.603          1.59          7.06
+Q  :          1.01          1.01          1.01          1.01          1.01           nan
+V2 :          4.24          4.24          4.24          4.24          4.24           nan
+
+Elapsed time (seconds):      5.6
+CPU time     (seconds):       35
+Iterations:      100 (Autostop)
+
+ -------------------------------------------------------------------------------
+
+
+Estimation of the individual parameters by Conditional Mode --------------------
+               min            Q1        median            Q3           max  shrinkage(%)
+V  :          1.18          2.78          4.73          6.82          11.9        -0.108
+Vm :          4.49          4.49          4.52          4.52          4.52           nan
+Km :          3.06          3.06          3.06          3.06          3.06           nan
+Cl :         0.221         0.359         0.491         0.611          1.62          7.31
+Q  :          1.01          1.01          1.01          1.01          1.01           nan
+V2 :          4.24          4.24          4.24          4.24          4.24           nan
+
+Elapsed time (seconds):     0.52
+CPU time     (seconds):        3
+
+ -------------------------------------------------------------------------------
+
+ _______________________________________________________________________________
+
+
+
+DATASET INFORMATION
+Number of individuals: 75
+Number of observations (CONC): 2801
+Number of doses: 300
+

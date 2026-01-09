@@ -1,0 +1,93 @@
+********************************************************************************
+*                         ModelBuilding_003.mlxtran                            *
+*                         January 08, 2026 at 20:19:04                         *
+*                         Monolix version : 2024R1                             *
+********************************************************************************
+
+
+ESTIMATION OF THE POPULATION PARAMETERS ________________________________________
+
+Fixed Effects ----------------------------
+V_pop          :                      4.32
+Vm_pop         :                      25.3
+beta_Vm_ADA_NA :                      7.93
+Km_pop         :                  1.36e+06
+Cl_pop         :                      16.3
+beta_Cl_ADA_NA :                    -0.858
+beta_Cl_ALB    :                   -0.0589
+Q_pop          :                     0.403
+V2_pop         :                      1.36
+
+Standard Deviation of the Random Effects -
+omega_V        :                     0.529
+omega_Cl       :                     0.673
+
+Error Model Parameters -------------------
+a              :                     0.292
+b              :                  2.22e-16
+
+Elapsed time (seconds):  2.3e+02
+CPU time     (seconds):  1.4e+03
+Exploratory phase iterations:      191 (Autostop)
+Smoothing phase iterations:        115 (Autostop)
+
+ _______________________________________________________________________________
+
+
+
+ESTIMATION OF THE INDIVIDUAL PARAMETERS ________________________________________
+
+
+Estimation of the individual parameters by Conditional Distribution ------------
+               min            Q1        median            Q3           max  shrinkage(%)
+V  :          1.25          2.83          4.49          6.59          13.4        -0.101
+Vm :          25.3      7.04e+04      7.04e+04      7.04e+04      7.04e+04           nan
+Km :      1.36e+06      1.36e+06      1.36e+06      1.36e+06      1.36e+06           nan
+Cl :         0.237         0.767          1.23          2.13          3.61        -0.465
+Q  :         0.403         0.403         0.403         0.403         0.403           nan
+V2 :          1.36          1.36          1.36          1.36          1.36           nan
+
+Elapsed time (seconds):      4.1
+CPU time     (seconds):       25
+Iterations:       79 (Autostop)
+
+ -------------------------------------------------------------------------------
+
+
+Estimation of the individual parameters by Conditional Mode --------------------
+               min            Q1        median            Q3           max  shrinkage(%)
+V  :          1.23          2.84          4.42          6.66          13.3        -0.343
+Vm :          25.3      7.04e+04      7.04e+04      7.04e+04      7.04e+04           nan
+Km :      1.36e+06      1.36e+06      1.36e+06      1.36e+06      1.36e+06           nan
+Cl :         0.234         0.763          1.23          2.15          3.67         -0.82
+Q  :         0.403         0.403         0.403         0.403         0.403           nan
+V2 :          1.36          1.36          1.36          1.36          1.36           nan
+
+Elapsed time (seconds):     0.45
+CPU time     (seconds):        3
+
+ -------------------------------------------------------------------------------
+
+ _______________________________________________________________________________
+
+
+
+
+ESTIMATION OF THE LOG-LIKELIHOOD _______________________________________________
+
+                                                           (lin)
+-2 x log-likelihood                       (OFV) :       19073.83
+Akaike Information Criteria               (AIC) :       19099.83
+Corrected Bayesian Information Criteria  (BICc) :       19162.54
+Bayesian Information Criteria             (BIC) :       19129.96
+
+Elapsed time                          (seconds) :           0.26
+CPU time                              (seconds) :           0.00
+
+ _______________________________________________________________________________
+
+DATASET INFORMATION
+Number of individuals: 75
+Number of observations (CONC): 2801
+Number of doses: 300
+
