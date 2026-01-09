@@ -1,0 +1,73 @@
+Time-varying BW on CL (ETA1) has median  66.26 and mean  65.42
+Time-varying ALB on CL (ETA1) has median  31.85 and mean  31.40
+Time-varying CREAT on CL (ETA1) has median   1.02 and mean   1.02
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run15/rundir/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF    SIGNIFICANT PVAL
+CLADA-2          PVAL   5367.60170   5366.16574              1.43597  >   3.84150    1              0.230790 
+CLAGE-5          PVAL   5367.60170   5367.21039              0.39131  >   3.84150    1              0.531610 
+CLALB-5          PVAL   5367.60170   5314.26009             53.34161  >   3.84150    1        YES!  2.80e-13 
+CLBW-5           PVAL   5367.60170   5368.09174             -0.49004  >   3.84150    1                   9999
+CLCREAT-5        PVAL   5367.60170     FAILED                 FAILED  >   3.84150    1                    999
+CLSEX-2          PVAL   5367.60170   5366.24101              1.36069  >   3.84150    1              0.243420 
+
+Parameter-covariate relation chosen in this forward step: CL-ALB-5
+CRITERION              PVAL < 0.05
+BASE_MODEL_OFV        5367.60170
+CHOSEN_MODEL_OFV      5314.26009
+Relations included after this step:
+CL      ALB-5            
+--------------------
+
+
+Taking a step forward in adaptive scope reduction scm after reducing scope with 4 relations : CL-ADA,CL-AGE,CL-CREAT,CL-SEX
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run15/rundir/reduced_forward_scm_dir2/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF    SIGNIFICANT PVAL
+CLBW-5           PVAL   5314.26009   5310.71971              3.54039  >   3.84150    1              0.059892 
+
+--------------------
+
+
+adaptive scope reduction scm forward search with reduced scope is done.
+Included relations so far:  CL-ALB-5
+Re-testing 4 relations after adaptive scope reduction scm reduced forward search : CL-ADA,CL-AGE,CL-CREAT,CL-SEX
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run15/rundir/readded_forward_scm_dir3/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF    SIGNIFICANT PVAL
+CLADA-2          PVAL   5314.26009   5279.76216             34.49794  >   3.84150    1        YES!  4.27e-09 
+CLAGE-5          PVAL   5314.26009   5313.67556              0.58454  >   3.84150    1              0.444540 
+CLCREAT-5        PVAL   5314.26009     FAILED                 FAILED  >   3.84150    1                    999
+CLSEX-2          PVAL   5314.26009   5268.64273             45.61737  >   3.84150    1        YES!  1.44e-11 
+
+Parameter-covariate relation chosen in this forward step: CL-SEX-2
+CRITERION              PVAL < 0.05
+BASE_MODEL_OFV        5314.26009
+CHOSEN_MODEL_OFV      5268.64273
+Relations included after this step:
+CL      ALB-5            SEX-2            
+--------------------
+
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run15/rundir/readded_forward_scm_dir3/scm_dir1/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF    SIGNIFICANT PVAL
+CLADA-2          PVAL   5268.64273     FAILED                 FAILED  >   3.84150    1                    999
+CLAGE-5          PVAL   5268.64273   5349.19551            -80.55279  >   3.84150    1                   9999
+CLCREAT-5        PVAL   5268.64273     FAILED                 FAILED  >   3.84150    1                    999
+
+--------------------
+
+
+scmplus forward search is done.
+Starting scmplus backward search
+Model directory /home/ali/Documents/GitHub/Modelling-project/scm_run15/rundir/backward_scm_dir5/m1
+
+MODEL            TEST     BASE OFV     NEW OFV         TEST OFV (DROP)    GOAL     dDF  INSIGNIFICANT PVAL
+CLALB-1          PVAL   5268.64273   5330.51758            -61.87486  >  -6.63490   -1              3.66e-15 
+CLSEX-1          PVAL   5268.64273   5307.21607            -38.57335  >  -6.63490   -1              5.27e-10 
+
+--------------------
+
+
+scmplus backward search is done.
+

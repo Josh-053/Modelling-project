@@ -1,0 +1,97 @@
+---
+# title: "Bootstrap"
+output: pdf_document
+classoption:
+  - a4paper
+  - landscape
+geometry: margin=1.5cm
+---
+
+```{r input_from_PsN,include=FALSE}
+
+#START OF AUTO-GENERATED PREAMBLE, WILL BE OVERWRITTEN WHEN THIS FILE IS USED AS A TEMPLATE
+#Created 2026-01-09 at 08:05
+
+xpose.runno <- '16.mod'
+toolname <- 'bootstrap'
+pdf.filename <- paste0('PsN_',toolname,'_plots.pdf')
+working.directory<-'/home/ali/Documents/GitHub/Modelling-project/bootstrap_run16/'
+results.directory <- '..'
+subset.variable<-NULL
+tab.suffix <- '' 
+rscripts.directory <- '/usr/local/share/perl5/5.40/PsN_5_6_0/R-scripts' # This is not used
+tool.results.file <- 'bootstrap_results.csv'
+raw.results.file <- 'raw_results_run16.csv'
+theta.labels <- c('[1] CL (L/d)','VMAX','KM','[2,3] V1 (L)','V2','Q','CLALB')
+theta.fixed <- c(FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE)
+omega.labels <- c('IIV CL')
+omega.fixed <- c(FALSE)
+sigma.labels <- c('EPS(1), proportional','EPS(2)')
+sigma.fixed <- c(FALSE,TRUE)
+n.eta <- 1
+n.eps <- 2
+
+#bootstrap-specific preamble
+ESTIMATED.PARAMS <- c('[1] CL (L/d)','VMAX','KM','[2,3] V1 (L)','V2','Q','CLALB','IIV CL','EPS(1), proportional')
+included.ids.file <- 'included_individuals1.csv'
+skip.minimization.terminated=TRUE
+skip.covariance.step.terminated=FALSE
+skip.with.covstep.warnings=FALSE
+skip.estimate.near.boundary=TRUE
+
+setwd(working.directory)
+
+############################################################################
+#END OF AUTO-GENERATED PREAMBLE
+#WHEN THIS FILE IS USED AS A TEMPLATE THIS LINE MUST LOOK EXACTLY LIKE THIS
+
+
+```
+
+
+```{r loading_libraries_and_sourcing_functions,include = FALSE}
+library(PsNR)
+library(magrittr)
+library(methods)
+library(xpose4)
+library(dplyr)
+library(PerformanceAnalytics)
+#add R_info to the meta file
+R_info(directory=working.directory)
+
+meta <- PsNR::metadata(working.directory)
+```
+
+```{r histograms_of_all_parameters,results='hide',warning=FALSE,echo=FALSE,fig.width=10,fig.height=7,fig.keep="high",fig.align="center"}
+bootplots <- xpose4::boot.hist(results.file=raw.results.file,incl.ids.file=included.ids.file,
+                       min.failed=skip.minimization.terminated,
+                       cov.failed=skip.covariance.step.terminated,
+                       cov.warnings=skip.with.covstep.warnings,
+                       boundary=skip.estimate.near.boundary)
+print(bootplots[1]) #parameters
+```
+
+\pagebreak
+
+```{r Histogram_of_objective_function,results='hide',echo=FALSE,fig.width=10,fig.height=7,fig.keep="high",fig.align="center"}
+if (PsNR::rplots_level(meta) > 1){
+    print(bootplots[2:4]) #SEs ofv eigenvalues
+}
+```
+
+\pagebreak
+
+
+```{r correlation_plot,results='hide',echo=FALSE,fig.width=10,fig.height=7,fig.keep="high",fig.align="center"}
+if(file.exists("raw_results_dofv.csv")) {
+  df <- read.csv("raw_results_dofv.csv",stringsAsFactors = F)
+  needed_column <- fix_column_names(c("deltaofv", ESTIMATED.PARAMS))
+  if(nrow(df)>1) {
+    df <- df %>% 
+      dplyr::select(!!needed_column) %>%
+      dplyr::slice(-1)
+    suppressWarnings(PerformanceAnalytics::chart.Correlation(df, histogram = TRUE, method = c("spearman")))
+  }
+}
+```
+

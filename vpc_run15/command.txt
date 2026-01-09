@@ -1,0 +1,2 @@
+/usr/local/bin/vpc -samples=1000 -auto_bin=auto -dir=vpc_run15 -lloq=1 -dv=CONC_M7 -idv=TAD -nozip run15.mod
+/usr/local/bin/vpc -samples=1000 -auto_bin=auto -dir=vpc_run15 -lloq=1 -dv=CONC_M7 -idv=TAD -nozip run16.mod
